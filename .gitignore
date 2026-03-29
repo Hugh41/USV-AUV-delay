@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# Trained model weights
+models_td3_*/
+models_dsac_*/
+*.pth
+*.pkl
+
+# Experiment output data
+comparison_results/
+delay_comparison_results/
+results/
+td3_figure_exports/
+phasewise_err.txt
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs and temp
+*.log
+*.tmp
+tmp/
+logs/
+
+# DSAC-v2 results (large binary files)
+DSAC-v2/results/
+DSAC-v2/figures/
