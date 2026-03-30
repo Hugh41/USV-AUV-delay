@@ -610,7 +610,7 @@ def make_team_summary_gif(data_dir: str, output: str,
             imp_txts1[i].set_position((i, h_te * 1.03))
             imp_txts2[i].set_text(f'↓{mv_imp[i]*frac:.0f}%')
             imp_txts2[i].set_position((i, h_mv * 1.03))
-            imp_txts3[i].set_text(f'↑{dj_imp[i]*frac:.0f}%')
+            imp_txts3[i].set_text(f'↓{dj_imp[i]*frac:.0f}%')
             imp_txts3[i].set_position((i, h_dj * 1.03))
 
         return (*bars1_t, *bars1_s, *bars2_t, *bars2_s,
