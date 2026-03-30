@@ -50,8 +50,8 @@ phasewise_err.txt
 tmp/
 logs/
 
-# Generated GIF outputs (check in selectively)
-# docs/*.gif  # uncomment to exclude GIFs from git
+# GIF outputs are tracked in figures/ — exclude any large regenerated copies
+docs/
 
 # DSAC-v2 results (large binary files)
 DSAC-v2/results/

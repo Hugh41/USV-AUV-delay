@@ -20,7 +20,7 @@ Official simulation code for the paper:
 > Right: **Proposed** (Stackelberg + Phase-Aware RL, updates every $N_u = 5$ steps).*
 
 <p align="center">
-  <img src="docs/trajectory_comparison.gif" width="860" alt="Trajectory comparison GIF"/>
+  <img src="figures/trajectory_3auv.gif" width="860" alt="Trajectory comparison GIF"/>
 </p>
 
 **Key visual observation:** The proposed framework keeps the USV within a compact operating corridor
@@ -32,7 +32,15 @@ The baseline USV wanders across the workspace, racking up ~4× more surface moti
 ### Real-Time Metrics: Tracking Error / FIM Stability / USV Motion
 
 <p align="center">
-  <img src="docs/metrics_comparison.gif" width="860" alt="Metrics comparison GIF"/>
+  <img src="figures/metrics_3auv.gif" width="860" alt="Metrics comparison GIF"/>
+</p>
+
+---
+
+### Advantage Across Team Sizes (2 / 3 / 4 AUVs)
+
+<p align="center">
+  <img src="figures/team_size_summary.gif" width="860" alt="Team size summary GIF"/>
 </p>
 
 | Metric | Baseline | **Proposed** | Improvement |
@@ -91,17 +99,19 @@ USV-AUV-delay/
 ├── visualize_env.py                # Animate environment (trained model)
 ├── visualize_comparison_delay.py   # Visualise delay-condition results
 │
-├── create_demo_gif.py              # ★ Generate trajectory comparison GIF
-├── create_metrics_gif.py           # ★ Generate real-time metrics GIF
-│
-├── figures/                        # Paper figure reproduction (Fig. 1–9)
+├── figures/                        # All plotting tools and generated figures
+│   ├── generate_gifs.py            # ★ Generate all demo GIFs (main entry)
+│   ├── create_demo_gif.py          # Trajectory comparison GIF
+│   ├── create_metrics_gif.py       # Real-time metrics GIF
+│   ├── trajectory_3auv.gif         # ★ Demo: side-by-side trajectory animation
+│   ├── metrics_3auv.gif            # ★ Demo: metric evolution (50-episode mean)
+│   ├── team_size_summary.gif       # ★ Demo: advantage across 2/3/4 AUVs
 │   ├── plot_episode_frontier_delay.py
 │   ├── plot_td3_auv_panels.py
 │   ├── plot_td3_usv_occupancy_heatmaps.py
 │   ├── plot_phasewise_tracking_advantage.py
 │   └── plot_delay_compensation_phase_map.py
 │
-├── docs/                           # Generated GIF outputs (for README)
 ├── DSAC-v2/                        # DSAC-T backbone (submodule)
 └── requirements.txt
 ```
@@ -113,7 +123,7 @@ USV-AUV-delay/
 ### Installation
 
 ```bash
-git clone https://github.com/<your-username>/USV-AUV-delay.git
+git clone https://github.com/Hugh41/USV-AUV-delay.git
 cd USV-AUV-delay
 pip install -r requirements.txt
 
@@ -148,14 +158,17 @@ Results are saved to `delay_comparison_results/`.
 ### 3 — Generate Demo GIFs
 
 ```bash
-# Trajectory comparison GIF (Stackelberg vs Baseline side-by-side)
-python create_demo_gif.py --n_auv 3 --duration 10
+# Generate all 3 GIFs at once (requires delay_comparison_results/)
+python figures/generate_gifs.py \
+    --data_dir delay_comparison_results \
+    --n_auv 3 --model td3
 
-# Real-time metrics GIF (tracking error, FIM, USV motion)
-python create_metrics_gif.py --n_auv 3 --duration 12
+# Or generate individually
+python figures/create_demo_gif.py    # trajectory comparison
+python figures/create_metrics_gif.py # real-time metrics
 ```
 
-GIFs are written to `docs/`.
+GIFs are written to `figures/`.
 
 ### 4 — Reproduce Paper Figures (Fig. 1–9)
 
