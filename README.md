@@ -50,6 +50,22 @@ All animations are generated from real experiment data (50 trials × TD3/DSAC-T,
 
 <p align="center"><img src="README.assets/team_size_summary.gif" width="860"/></p>
 
+**USV Occupancy Heatmap — Stackelberg vs Baseline**
+
+*Proposed framework keeps the USV focused near the AUV cluster (high-density centre), while the baseline drifts widely across the workspace.*
+
+<p align="center"><img src="README.assets/usv_occupancy_heatmap.png" width="860"/></p>
+
+**USV Occupancy Metrics (Entropy & Radial Spread)**
+
+<p align="center"><img src="README.assets/usv_occupancy_hr_summary.png" width="860"/></p>
+
+**Mobility–Accuracy Pareto Front & Aggregate Bars**
+
+*Proposed framework simultaneously reduces USV travel distance and AUV tracking error across all team sizes.*
+
+<p align="center"><img src="README.assets/episode_frontier.png" width="860"/></p>
+
 ---
 
 ## Requirements

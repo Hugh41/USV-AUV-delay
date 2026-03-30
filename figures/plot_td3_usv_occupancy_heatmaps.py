@@ -306,7 +306,7 @@ def plot_occupancy_heatmap_figure(dataset, output_path):
     cbar.set_label("USV occupancy intensity", fontsize=LABEL_SIZE)
     cbar.ax.tick_params(labelsize=TICK_SIZE)
 
-    fig.savefig(output_path, bbox_inches="tight")
+    fig.savefig(output_path, bbox_inches="tight", dpi=150)
     plt.close(fig)
 
 
@@ -450,7 +450,7 @@ def plot_hr_summary_figure(dataset, output_path):
         bbox_to_anchor=(0.5, 0.88),
     )
 
-    fig.savefig(output_path, bbox_inches="tight")
+    fig.savefig(output_path, bbox_inches="tight", dpi=150)
     plt.close(fig)
 
 
@@ -487,11 +487,11 @@ def main():
 
     heatmap_figure_path = resolve_output_path(
         args.output_dir,
-        "td3_usv_occupancy_heatmap_2_3_4auv.pdf",
+        "td3_usv_occupancy_heatmap_2_3_4auv.png",
     )
     hr_summary_figure_path = resolve_output_path(
         args.output_dir,
-        "td3_usv_occupancy_hr_summary_2_3_4auv.pdf",
+        "td3_usv_occupancy_hr_summary_2_3_4auv.png",
     )
 
     plot_occupancy_heatmap_figure(dataset, heatmap_figure_path)

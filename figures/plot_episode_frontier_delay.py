@@ -887,7 +887,7 @@ def plot_combined_figure(dataset, output_path, bar_backbone="td3"):
     right_legend.get_frame().set_edgecolor("#d5dbe5")
     right_legend.get_frame().set_linewidth(1.0)
 
-    fig.savefig(output_path, bbox_inches="tight")
+    fig.savefig(output_path, bbox_inches="tight", dpi=150)
     plt.close(fig)
 
 
@@ -928,7 +928,7 @@ def main():
 
     dataset = build_dataset(args.delay_key)
 
-    combined_path = resolve_output_path(args.output_dir, "episode_frontier_with_bars.pdf")
+    combined_path = resolve_output_path(args.output_dir, "episode_frontier_with_bars.png")
     plot_combined_figure(dataset, combined_path, bar_backbone="td3")
 
     manifest = build_manifest(dataset, args.delay_key)
