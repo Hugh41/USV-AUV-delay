@@ -154,4 +154,4 @@ Key arguments for `visualize_env.py`:
 ## Acknowledgements
 
 - DSAC-T: [DSAC-v2](https://github.com/Jingliang-Duan/DSAC-v2) (Duan et al., TPAMI 2025)
-- Baseline: [*Never Too Cocky to Cooperate*](https://arxiv.org/abs/2504.14894) (Xu et al., IEEE TMC 2026)
+- Baseline: [Never Too Cocky to Cooperate](https://arxiv.org/abs/2504.14894) (Xu et al., IEEE TMC 2026)
