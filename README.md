@@ -209,13 +209,13 @@ Most USV-AUV coordination frameworks assume *synchronous* state access. In reali
 
 **Upper layer (USV leader)** — updated every $N_u = 5$ steps:
 
-$$p^*_{u,t} = \arg\max_{p_u \in \mathcal{Q}_t} \det J\!\left(p_u,\; \hat{P}^{\text{br}}_{a,t+1}(p_u;\, \bar{P}_{a,t})\right)$$
+$$p^*_{u,t} = \arg\max_{p_u \in \mathcal{Q}_t} \det J\!\bigl(p_u,\; \hat{P}^{\text{br}}_{a,t+1}(p_u;\, \bar{P}_{a,t})\bigr)$$
 
 *Uses stale buffered AUV estimates $\bar{P}_{a,t}$ and predicts follower best-responses before selecting the FIM-optimal geometry.*
 
 **Lower layer (AUV followers)** — acts every step:
 
-$$s^k_t = \left\{\Delta p^k_{j,t},\; \Delta p^k_{\text{tar},t},\; \tilde{p}_{k,t},\; b_{k,t},\; \rho_{\text{overflow},t},\; \underbrace{\phi_t = \tfrac{t \bmod N_u}{N_u}}_{\text{communication phase}}\right\}^\top$$
+$$s^k_t = \bigl\{\Delta p^k_{j,t},\; \Delta p^k_{\text{tar},t},\; \tilde{p}_{k,t},\; b_{k,t},\; \rho_{\text{overflow},t},\; \underbrace{\phi_t = \tfrac{t \bmod N_u}{N_u}}_{\text{communication phase}}\bigr\}^\top$$
 
 *The phase term $\phi_t$ removes scheduler aliasing: same geometry at different phases implies different next-step dynamics.*
 
