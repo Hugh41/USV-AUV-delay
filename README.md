@@ -20,20 +20,16 @@ Official simulation code for the paper:
 
 ### Trajectory Comparison: Stackelberg vs Baseline
 
-> *Left: Baseline (traditional FIM).  Right: **Proposed** (Stackelberg + Phase-Aware RL, $N_u = 5$).*
+*Left: Baseline (traditional FIM). Right: **Proposed** (Stackelberg + Phase-Aware RL, N<sub>u</sub> = 5).*
 
-<table>
-<tr>
-<td align="center"><b>2 AUVs</b></td>
-<td align="center"><b>3 AUVs</b></td>
-<td align="center"><b>4 AUVs</b></td>
-</tr>
-<tr>
-<td><img src="README.assets/trajectory_2auv.gif" width="270"/></td>
-<td><img src="README.assets/trajectory_3auv.gif" width="270"/></td>
-<td><img src="README.assets/trajectory_4auv.gif" width="270"/></td>
-</tr>
-</table>
+**2 AUVs — Trajectory**
+<p align="center"><img src="README.assets/trajectory_2auv.gif" width="860"/></p>
+
+**3 AUVs — Trajectory**
+<p align="center"><img src="README.assets/trajectory_3auv.gif" width="860"/></p>
+
+**4 AUVs — Trajectory**
+<p align="center"><img src="README.assets/trajectory_4auv.gif" width="860"/></p>
 
 **Key observation:** Proposed USV stays in a compact corridor (~0.9 km total) vs baseline (~3.6 km), while AUVs maintain full sensor-node coverage.
 
@@ -41,18 +37,14 @@ Official simulation code for the paper:
 
 ### Real-Time Metrics: Tracking Error / FIM / USV Motion  (mean ± std, 50 episodes)
 
-<table>
-<tr>
-<td align="center"><b>2 AUVs</b></td>
-<td align="center"><b>3 AUVs</b></td>
-<td align="center"><b>4 AUVs</b></td>
-</tr>
-<tr>
-<td><img src="README.assets/metrics_2auv.gif" width="270"/></td>
-<td><img src="README.assets/metrics_3auv.gif" width="270"/></td>
-<td><img src="README.assets/metrics_4auv.gif" width="270"/></td>
-</tr>
-</table>
+**2 AUVs — Metrics**
+<p align="center"><img src="README.assets/metrics_2auv.gif" width="860"/></p>
+
+**3 AUVs — Metrics**
+<p align="center"><img src="README.assets/metrics_3auv.gif" width="860"/></p>
+
+**4 AUVs — Metrics**
+<p align="center"><img src="README.assets/metrics_4auv.gif" width="860"/></p>
 
 ---
 
