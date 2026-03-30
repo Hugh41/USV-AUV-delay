@@ -22,9 +22,18 @@ Official simulation code for the paper:
 
 > *Left: Baseline (traditional FIM).  Right: **Proposed** (Stackelberg + Phase-Aware RL, $N_u = 5$).*
 
-| 2 AUVs | 3 AUVs | 4 AUVs |
-|:------:|:------:|:------:|
-| <img src="README.assets/trajectory_2auv.gif" width="280"/> | <img src="README.assets/trajectory_3auv.gif" width="280"/> | <img src="README.assets/trajectory_4auv.gif" width="280"/> |
+<table>
+<tr>
+<td align="center"><b>2 AUVs</b></td>
+<td align="center"><b>3 AUVs</b></td>
+<td align="center"><b>4 AUVs</b></td>
+</tr>
+<tr>
+<td><img src="README.assets/trajectory_2auv.gif" width="270"/></td>
+<td><img src="README.assets/trajectory_3auv.gif" width="270"/></td>
+<td><img src="README.assets/trajectory_4auv.gif" width="270"/></td>
+</tr>
+</table>
 
 **Key observation:** Proposed USV stays in a compact corridor (~0.9 km total) vs baseline (~3.6 km), while AUVs maintain full sensor-node coverage.
 
@@ -32,9 +41,18 @@ Official simulation code for the paper:
 
 ### Real-Time Metrics: Tracking Error / FIM / USV Motion  (mean ± std, 50 episodes)
 
-| 2 AUVs | 3 AUVs | 4 AUVs |
-|:------:|:------:|:------:|
-| <img src="README.assets/metrics_2auv.gif" width="280"/> | <img src="README.assets/metrics_3auv.gif" width="280"/> | <img src="README.assets/metrics_4auv.gif" width="280"/> |
+<table>
+<tr>
+<td align="center"><b>2 AUVs</b></td>
+<td align="center"><b>3 AUVs</b></td>
+<td align="center"><b>4 AUVs</b></td>
+</tr>
+<tr>
+<td><img src="README.assets/metrics_2auv.gif" width="270"/></td>
+<td><img src="README.assets/metrics_3auv.gif" width="270"/></td>
+<td><img src="README.assets/metrics_4auv.gif" width="270"/></td>
+</tr>
+</table>
 
 ---
 
@@ -199,7 +217,7 @@ $$p^*_{u,t} = \arg\max_{p_u \in \mathcal{Q}_t} \det J\!\bigl(p_u,\; \hat{P}^{\te
 
 **Lower layer (AUV followers)** — acts every step:
 
-$$s^k_t = \bigl\{\Delta p^k_{j,t},\; \Delta p^k_{\text{tar},t},\; \tilde{p}_{k,t},\; b_{k,t},\; \rho_{\text{overflow},t},\; \underbrace{\phi_t = \tfrac{t \bmod N_u}{N_u}}_{\text{communication phase}}\bigr\}^\top$$
+$$s^k_t = \bigl\lbrace\Delta p^k_{j,t},\; \Delta p^k_{\text{tar},t},\; \tilde{p}_{k,t},\; b_{k,t},\; \rho_{\text{overflow},t},\; \underbrace{\phi_t = \tfrac{t \bmod N_u}{N_u}}_{\text{communication phase}}\bigr\rbrace^\top$$
 
 *The phase term $\phi_t$ removes scheduler aliasing: same geometry at different phases implies different next-step dynamics.*
 
