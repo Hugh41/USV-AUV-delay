@@ -120,7 +120,7 @@ METRIC_NAMES_CN = {
 # 参数设置
 parser = argparse.ArgumentParser()
 # ------ 实验参数 ------
-parser.add_argument("--repeat_num", type=int, default=10, help="每个时延条件的重复实验次数")
+parser.add_argument("--repeat_num", type=int, default=50, help="每个时延条件的重复实验次数")
 parser.add_argument(
     "--episode_length", type=int, default=1000, help="每个episode的长度 (sec)"
 )

@@ -104,7 +104,7 @@ Key arguments for `compare_delay_stackelberg.py`:
 |---|---|---|
 | `--N_AUV` | 2 | Number of AUVs |
 | `--model_type` | `td3` | RL backbone: `td3` or `dsac` |
-| `--repeat_num` | 10 | Trials per condition |
+| `--repeat_num` | 50 | Trials per condition |
 | `--load_ep` | 575 | Model checkpoint to load |
 | `--fixed_delay` | 0.1 s | Fixed propagation delay |
 | `--sampling_delay_max` | 0.333 s | Max sampling delay |
