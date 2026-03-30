@@ -6,10 +6,6 @@ Training, evaluation and simulation code for the paper:
 > Jingzehua Xu†, Hongmiaoyi Zhang†, Yubo Huang, Zixi Wang, Junhao Huang, Guanwen Xie, Xiaofan Li
 > *IEEE Transactions on Mobile Computing*, 2026.
 
----
-
-## Figures
-
 <p align="center"><img src="README.assets/Snipaste.png" width="860"/></p>
 
 ---
