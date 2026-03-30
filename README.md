@@ -20,7 +20,7 @@ Official simulation code for the paper:
 > Right: **Proposed** (Stackelberg + Phase-Aware RL, updates every $N_u = 5$ steps).*
 
 <p align="center">
-  <img src="figures/trajectory_3auv.gif" width="860" alt="Trajectory comparison GIF"/>
+  <img src="README.assets/trajectory_3auv.gif" width="860" alt="Trajectory comparison GIF"/>
 </p>
 
 **Key visual observation:** The proposed framework keeps the USV within a compact operating corridor
@@ -32,7 +32,7 @@ The baseline USV wanders across the workspace, racking up ~4× more surface moti
 ### Real-Time Metrics: Tracking Error / FIM Stability / USV Motion
 
 <p align="center">
-  <img src="figures/metrics_3auv.gif" width="860" alt="Metrics comparison GIF"/>
+  <img src="README.assets/metrics_3auv.gif" width="860" alt="Metrics comparison GIF"/>
 </p>
 
 ---
@@ -40,7 +40,7 @@ The baseline USV wanders across the workspace, racking up ~4× more surface moti
 ### Advantage Across Team Sizes (2 / 3 / 4 AUVs)
 
 <p align="center">
-  <img src="figures/team_size_summary.gif" width="860" alt="Team size summary GIF"/>
+  <img src="README.assets/team_size_summary.gif" width="860" alt="Team size summary GIF"/>
 </p>
 
 | Metric | Baseline | **Proposed** | Improvement |
@@ -99,13 +99,16 @@ USV-AUV-delay/
 ├── visualize_env.py                # Animate environment (trained model)
 ├── visualize_comparison_delay.py   # Visualise delay-condition results
 │
-├── figures/                        # All plotting tools and generated figures
-│   ├── generate_gifs.py            # ★ Generate all demo GIFs (main entry)
-│   ├── create_demo_gif.py          # Trajectory comparison GIF
-│   ├── create_metrics_gif.py       # Real-time metrics GIF
+├── README.assets/                  # Images and GIFs embedded in README
 │   ├── trajectory_3auv.gif         # ★ Demo: side-by-side trajectory animation
 │   ├── metrics_3auv.gif            # ★ Demo: metric evolution (50-episode mean)
 │   ├── team_size_summary.gif       # ★ Demo: advantage across 2/3/4 AUVs
+│   └── Snipaste_2024-10-15_10-26-38.png
+│
+├── figures/                        # Plotting tools and paper figure scripts
+│   ├── generate_gifs.py            # ★ Generate all demo GIFs (main entry)
+│   ├── create_demo_gif.py          # Trajectory comparison GIF
+│   ├── create_metrics_gif.py       # Real-time metrics GIF
 │   ├── plot_episode_frontier_delay.py
 │   ├── plot_td3_auv_panels.py
 │   ├── plot_td3_usv_occupancy_heatmaps.py
