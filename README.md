@@ -59,7 +59,7 @@ Official simulation code for the paper:
 ### Advantage Across Team Sizes (2 / 3 / 4 AUVs)
 
 <p align="center">
-  <img src="README.assets/team_size_summary.gif" width="680" alt="Team size summary GIF"/>
+  <img src="README.assets/team_size_summary.gif" width="860" alt="Team size summary GIF"/>
 </p>
 
 | Metric | Baseline | **Proposed** | Improvement |
