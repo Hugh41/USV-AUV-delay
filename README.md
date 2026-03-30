@@ -1,148 +1,57 @@
 # USV-AUV-delay
 
-[![IEEE TMC](https://img.shields.io/badge/IEEE-TMC-blue)](https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=7755)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-Official simulation code for the paper:
+Training, evaluation and simulation code for the paper:
 
 > **Communication-Aware Time-Scale-Separated Bi-Level Coordination for USV-AUV Collaboration in Underwater Mobile Computing**
 > Jingzehua Xu†, Hongmiaoyi Zhang†, Yubo Huang, Zixi Wang, Junhao Huang, Guanwen Xie, Xiaofan Li
-> *IEEE Transactions on Mobile Computing*, 2026. ([IROS 2025 preliminary version](https://ieeexplore.ieee.org/))
+> *IEEE Transactions on Mobile Computing*, 2026.
 
 ---
 
 ## Demo
 
-> All animations are generated from **real experiment data** (50 trials × TD3/DSAC-T, acoustic delay + Rayleigh packet loss).
+All animations are generated from real experiment data (50 trials × TD3/DSAC-T, acoustic delay + Rayleigh packet loss).
 
----
+**Trajectory Comparison — Stackelberg vs Baseline**
 
-### Trajectory Comparison: Stackelberg vs Baseline
+*Left: Baseline. Right: Proposed (Stackelberg + Phase-Aware RL).*
 
-*Left: Baseline (traditional FIM). Right: **Proposed** (Stackelberg + Phase-Aware RL, N<sub>u</sub> = 5).*
-
-**2 AUVs — Trajectory**
+**2 AUVs**
 <p align="center"><img src="README.assets/trajectory_2auv.gif" width="860"/></p>
 
-**3 AUVs — Trajectory**
+**3 AUVs**
 <p align="center"><img src="README.assets/trajectory_3auv.gif" width="860"/></p>
 
-**4 AUVs — Trajectory**
+**4 AUVs**
 <p align="center"><img src="README.assets/trajectory_4auv.gif" width="860"/></p>
 
-**Key observation:** Proposed USV stays in a compact corridor (~0.9 km total) vs baseline (~3.6 km), while AUVs maintain full sensor-node coverage.
+**Real-Time Metrics: Tracking Error / FIM / USV Motion (mean ± std, 50 episodes)**
 
----
-
-### Real-Time Metrics: Tracking Error / FIM / USV Motion  (mean ± std, 50 episodes)
-
-**2 AUVs — Metrics**
+**2 AUVs**
 <p align="center"><img src="README.assets/metrics_2auv.gif" width="860"/></p>
 
-**3 AUVs — Metrics**
+**3 AUVs**
 <p align="center"><img src="README.assets/metrics_3auv.gif" width="860"/></p>
 
-**4 AUVs — Metrics**
+**4 AUVs**
 <p align="center"><img src="README.assets/metrics_4auv.gif" width="860"/></p>
 
----
+**RL Backbone Comparison: TD3 vs DSAC-T (Stackelberg, 3 AUVs)**
 
-### RL Backbone Comparison: TD3 vs DSAC-T  (Stackelberg, 3 AUVs)
+<p align="center"><img src="README.assets/td3_vs_dsac_3auv.gif" width="860"/></p>
 
-<p align="center">
-  <img src="README.assets/td3_vs_dsac_3auv.gif" width="860" alt="TD3 vs DSAC comparison GIF"/>
-</p>
+**Advantage Across Team Sizes (2 / 3 / 4 AUVs)**
 
----
-
-### Advantage Across Team Sizes (2 / 3 / 4 AUVs)
-
-<p align="center">
-  <img src="README.assets/team_size_summary.gif" width="860" alt="Team size summary GIF"/>
-</p>
-
-| Metric | Baseline | **Proposed** | Improvement |
-|--------|:--------:|:------------:|:-----------:|
-| Avg. Tracking Error (2 AUV) | 0.277 m | **0.239 m** | **−13.8%** |
-| Avg. Tracking Error (3 AUV) | 0.242 m | **0.221 m** | **−8.7%** |
-| Avg. Tracking Error (4 AUV) | 0.217 m | **0.206 m** | **−5.3%** |
-| USV Cumulative Motion       | ~3.6 km | **~0.9 km** | **−75%** |
-| FIM Stability               | spiky   | **smooth**  | ✓ |
+<p align="center"><img src="README.assets/team_size_summary.gif" width="860"/></p>
 
 ---
 
-## Overview
+## Requirements
 
-This repository implements a **communication-aware, time-scale-separated bi-level coordination framework** for USV–AUV collaboration that explicitly accounts for:
+- Python 3.8+
+- See `requirements.txt`
 
-- **Long acoustic propagation delay** (modelled as $\tau = \tau_\text{samp} + \tau_\text{proc} + d/c_a$)
-- **Rayleigh-fading packet loss** (distance-dependent PER via SNR → BER → PER chain)
-- **Stale leader-side observations** (buffered, delay-fused AUV position estimates)
-
-The framework exploits the **intrinsic time-scale asymmetry** between the surface leader and underwater followers:
-
-```
-Upper layer (USV / Leader)                 Lower layer (AUV / Followers)
-──────────────────────────────────         ──────────────────────────────────
-Updates every Nu = 5 steps                 Acts every step
-Optimises FIM det(J) via DE               TD3 / DSAC-T policy
-Uses stale + buffered AUV positions       Phase-aware state φ_t = (t mod Nu)/Nu
-Predicts follower best-response           Adapts to temporal coordination phase
-```
-
-<p align="center">
-  <img src="README.assets/Snipaste_2024-10-15_10-26-38.png" width="600"/>
-</p>
-
----
-
-## Repository Structure
-
-```
-USV-AUV-delay/
-├── env.py                          # Simulation environment
-├── td3.py                          # TD3 actor-critic
-├── tidewave_usbl.py                # USBL acoustic positioning model
-├── stackelberg_game.py             # USV Stackelberg leader (FIM + DE)
-├── water_model.py                  # Acoustic delay & packet-loss model
-├── colab.py                        # Collaboration utilities
-│
-├── train_td3.py                    # Train AUV followers (TD3)
-├── train_dsac.py                   # Train AUV followers (DSAC-T)
-├── eval_td3.py                     # Evaluate trained TD3 policies
-│
-├── compare_delay_stackelberg.py    # Run Table II/III experiments (with delay + packet loss)
-├── run_delay_packetloss_exp.sh     # Batch run all team-size settings
-│
-├── visualize_env.py                # Animate environment (trained model)
-├── visualize_comparison_delay.py   # Visualise delay-condition results
-│
-├── README.assets/                  # Images and GIFs embedded in README
-│   ├── trajectory_3auv.gif         # ★ Demo: side-by-side trajectory animation
-│   ├── metrics_3auv.gif            # ★ Demo: metric evolution (50-episode mean)
-│   ├── team_size_summary.gif       # ★ Demo: advantage across 2/3/4 AUVs
-│   └── Snipaste_2024-10-15_10-26-38.png
-│
-├── figures/                        # Plotting tools and paper figure scripts
-│   ├── generate_gifs.py            # ★ Generate all demo GIFs (main entry)
-│   ├── create_demo_gif.py          # Trajectory comparison GIF
-│   ├── create_metrics_gif.py       # Real-time metrics GIF
-│   ├── plot_episode_frontier_delay.py
-│   ├── plot_td3_auv_panels.py
-│   ├── plot_td3_usv_occupancy_heatmaps.py
-│   ├── plot_phasewise_tracking_advantage.py
-│   └── plot_delay_compensation_phase_map.py
-│
-├── DSAC-v2/                        # DSAC-T backbone (submodule)
-└── requirements.txt
-```
-
----
-
-## Quick Start
-
-### Installation
+## Installation
 
 ```bash
 git clone https://github.com/Hugh41/USV-AUV-delay.git
@@ -153,94 +62,39 @@ pip install -r requirements.txt
 cd DSAC-v2 && pip install -e . && cd ..
 ```
 
-### 1 — Train AUV Policies
+## Train
 
 ```bash
-# TD3 (default backbone)
+# TD3 (default)
 python train_td3.py --N_AUV 3
 
-# DSAC-T (for generalisation study)
+# DSAC-T
 python train_dsac.py --N_AUV 3
 ```
 
-Models are saved to `models_td3_3AUV_5/` (format: `models_{type}_{N_AUV}AUV_{Nu}/`).
+Models are saved to `models_{type}_{N_AUV}AUV_{Nu}/`.
 
-### 2 — Run Experiments (Tables II & III)
+## Run Experiments
 
 ```bash
-# Single run: 3 AUVs, TD3, with acoustic delay + packet loss
+# Single run: 3 AUVs, TD3, 50 trials
 python compare_delay_stackelberg.py --N_AUV 3 --rl_type td3 --repeat_num 50
 
-# Batch: all team sizes (2/3/4 AUVs) × both RL backbones
+# Batch: all team sizes × both backbones
 bash run_delay_packetloss_exp.sh
 ```
 
 Results are saved to `delay_comparison_results/`.
 
-### 3 — Visualise Live Environment
+## Visualise
 
 ```bash
+# Animate trained policy in environment
 python visualize_env.py --N_AUV 3 --load_ep 500
+
+# Plot comparison results
+python visualize_comparison_delay.py
 ```
-
----
-
-## Method
-
-### Problem
-
-Most USV-AUV coordination frameworks assume *synchronous* state access. In realistic underwater systems, acoustic communication introduces:
-
-| Challenge | Consequence |
-|-----------|-------------|
-| Long propagation delay $\tau \propto d/c_a$ | USV makes decisions on stale follower positions |
-| Rayleigh-fading packet loss | AUV positions intermittently unavailable |
-| Asynchronous updates | Followers must act without fresh leader commands |
-
-### Solution
-
-**Communication-aware time-scale-separated bi-level coordination:**
-
-**Upper layer (USV leader)** — updated every $N_u = 5$ steps:
-
-$$p^*_{u,t} = \arg\max_{p_u \in \mathcal{Q}_t} \det J\!\bigl(p_u,\; \hat{P}^{\text{br}}_{a,t+1}(p_u;\, \bar{P}_{a,t})\bigr)$$
-
-*Uses stale buffered AUV estimates $\bar{P}_{a,t}$ and predicts follower best-responses before selecting the FIM-optimal geometry.*
-
-**Lower layer (AUV followers)** — acts every step:
-
-$$s^k_t = \bigl\lbrace\Delta p^k_{j,t},\; \Delta p^k_{\text{tar},t},\; \tilde{p}_{k,t},\; b_{k,t},\; \rho_{\text{overflow},t},\; \underbrace{\phi_t = \tfrac{t \bmod N_u}{N_u}}_{\text{communication phase}}\bigr\rbrace^\top$$
-
-*The phase term $\phi_t$ removes scheduler aliasing: same geometry at different phases implies different next-step dynamics.*
-
-### Theoretical Guarantees
-
-| Result | Claim |
-|--------|-------|
-| Lemma V.1 | $\mathbb{E}[\tau \mid d] = 0.2665 + d/1500$ — delay grows affinely with distance |
-| Prop. V.2 | Buffered error resets on reception; packet loss is the accumulation driver |
-| Prop. V.3 | Phase term $\phi_t$ is *necessary* — its omission causes scheduler aliasing |
-| Theorem V.4 | Stage-wise Stackelberg equilibrium *exists* (Weierstrass theorem) |
-| Theorem V.5 | Prediction-mismatch loss $\leq 2L_J\varepsilon_{\text{br}} + \eta_t$ |
-| Prop. V.6 | Average USV motion $\leq \Delta_u/N_u + \Delta_u/H$ (structural bound) |
-
----
-
-## Experimental Configuration
-
-| Parameter | Value |
-|-----------|-------|
-| Workspace | 200 m × 200 m, depth 100 m |
-| Sensor nodes | 30, Poisson rate ∈ {3,5,8,12} Mbps |
-| AUV team size | 2 / 3 / 4 |
-| AUV speed | [1.2, 2.2] m/s |
-| USV update interval $N_u$ | 5 steps |
-| Episode length | 1000 steps |
-| Acoustic frequency | 20 kHz |
-| Packet size $L_p$ | 4096 bits |
-| Fading | Rayleigh, $\sigma_h = 1/\sqrt{2}$ |
-| DE solver | $P=20$, $I=100$ |
-| Evaluation | 50 trials × 3 groups |
 
 ---
 
@@ -257,15 +111,6 @@ $$s^k_t = \bigl\lbrace\Delta p^k_{j,t},\; \Delta p^k_{\text{tar},t},\; \tilde{p}
   publisher={IEEE}
 }
 ```
-
----
-
-## License
-
-MIT License. See [LICENSE](LICENSE) for details.  
-The DSAC-v2 submodule has its own license — see `DSAC-v2/README.md`.
-
----
 
 ## Acknowledgements
 
