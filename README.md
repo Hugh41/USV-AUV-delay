@@ -8,13 +8,13 @@ Training, evaluation and simulation code for the paper:
 
 ---
 
-## System Overview
+## Figures
 
 <p align="center"><img src="README.assets/Snipaste.png" width="860"/></p>
 
 ---
 
-## Demo
+## Experiments
 
 All animations are generated from real experiment data (50 trials × TD3/DSAC-T, acoustic delay + Rayleigh packet loss).
 
