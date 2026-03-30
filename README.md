@@ -72,17 +72,43 @@ python train_td3.py --N_AUV 3
 python train_dsac.py --N_AUV 3
 ```
 
+Key arguments for `train_td3.py` / `train_dsac.py`:
+
+| Argument | Default | Description |
+|---|---|---|
+| `--N_AUV` | 2 | Number of AUVs |
+| `--episode_num` | 600 | Training episodes |
+| `--episode_length` | 1000 | Steps per episode |
+| `--n_s` | 30 | Number of sensor nodes |
+| `--N_u` / `--usv_update_frequency` | 5 | USV update interval (must match at eval) |
+| `--lr` | 0.001 | Learning rate (TD3) |
+| `--hidden_size` | 128 | Hidden layer size (TD3) |
+| `--save_model_freq` | 25 | Save checkpoint every N episodes |
+| `--load_ep` | — | Resume training from checkpoint |
+
 Models are saved to `models_{type}_{N_AUV}AUV_{Nu}/`.
 
 ## Run Experiments
 
 ```bash
 # Single run: 3 AUVs, TD3, 50 trials
-python compare_delay_stackelberg.py --N_AUV 3 --rl_type td3 --repeat_num 50
+python compare_delay_stackelberg.py --N_AUV 3 --model_type td3 --repeat_num 50
 
 # Batch: all team sizes × both backbones
 bash run_delay_packetloss_exp.sh
 ```
+
+Key arguments for `compare_delay_stackelberg.py`:
+
+| Argument | Default | Description |
+|---|---|---|
+| `--N_AUV` | 2 | Number of AUVs |
+| `--model_type` | `td3` | RL backbone: `td3` or `dsac` |
+| `--repeat_num` | 10 | Trials per condition |
+| `--load_ep` | 575 | Model checkpoint to load |
+| `--fixed_delay` | 0.1 s | Fixed propagation delay |
+| `--sampling_delay_max` | 0.333 s | Max sampling delay |
+| `--packet_loss_modes` | `0,1` | Packet loss modes (0=off, 1=on) |
 
 Results are saved to `delay_comparison_results/`.
 
@@ -92,9 +118,22 @@ Results are saved to `delay_comparison_results/`.
 # Animate trained policy in environment
 python visualize_env.py --N_AUV 3 --load_ep 500
 
-# Plot comparison results
-python visualize_comparison_delay.py
+# Save animation as GIF
+python visualize_env.py --N_AUV 3 --load_ep 500 --save_gif
+
+# Plot comparison results from a specific file
+python visualize_comparison_delay.py --result_file delay_comparison_results/.../result.json
 ```
+
+Key arguments for `visualize_env.py`:
+
+| Argument | Default | Description |
+|---|---|---|
+| `--N_AUV` | 2 | Number of AUVs |
+| `--load_ep` | — | Model checkpoint to load |
+| `--max_steps` | 200 | Steps to animate |
+| `--episode_length` | 1000 | Full episode length |
+| `--save_gif` | false | Save animation as GIF |
 
 ---
 
@@ -115,4 +154,4 @@ python visualize_comparison_delay.py
 ## Acknowledgements
 
 - DSAC-T: [DSAC-v2](https://github.com/Jingliang-Duan/DSAC-v2) (Duan et al., TPAMI 2025)
-- Baseline: *"Never Too Cocky to Cooperate"* (Xu et al., IEEE TMC 2026)
+- Baseline: [*Never Too Cocky to Cooperate*](https://arxiv.org/abs/2504.14894) (Xu et al., IEEE TMC 2026)
