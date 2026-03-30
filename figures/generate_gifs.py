@@ -327,7 +327,7 @@ def make_metrics_gif(data_file: str, output: str,
     ax_br = fig.add_subplot(gs[1, 1], facecolor=C_PANEL)
 
     fig.suptitle(
-        f'Real-Time Performance Metrics  ({n_auv} AUVs · TD3 · 1000 Steps · Acoustic Delay + Packet Loss)',
+        f'Real-Time Performance Metrics  ({n_auv} AUVs · TD3 · Acoustic Delay + Packet Loss)',
         color=C_TEXT, fontsize=11, fontweight='bold', y=0.95)
 
     for ax, title, ylab in [
