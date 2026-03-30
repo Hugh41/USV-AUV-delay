@@ -30,14 +30,14 @@ from td3 import TD3
 import copy
 
 
-def create_visualization(env, agents=None, render_steps=200, save_gif=False):
+def create_visualization(env, agents=None, render_length=200, save_gif=False):
     """
     创建环境可视化
     
     Args:
         env: 环境对象
         agents: TD3智能体列表（可选，如果提供则使用智能体选择动作）
-        render_steps: number of steps to render
+        render_length: number of steps to render
         save_gif: 是否保存为GIF动画
     """
     # 初始化环境
@@ -175,7 +175,7 @@ def create_visualization(env, agents=None, render_steps=200, save_gif=False):
     def animate(frame):
         nonlocal state, Ft, ep_reward, sum_rate, idu, N_DO, FX, Ec, mode, hovers
         
-        if Ft >= render_steps:
+        if Ft >= render_length:
             return
         
         # 选择动作
@@ -228,7 +228,7 @@ def create_visualization(env, agents=None, render_steps=200, save_gif=False):
                 bar.set_color('steelblue')
         
         # 更新指标文本
-        metrics_str = f"""Step: {Ft}/{render_steps}
+        metrics_str = f"""Step: {Ft}/{render_length}
 Episode Reward: {ep_reward:.2f}
 Total Data Rate: {sum_rate:.2f} Mbps
 Data Updates: {idu}
@@ -267,7 +267,7 @@ USV Position: [{env.usv_xy[0]:.1f}, {env.usv_xy[1]:.1f}]
                 auv_lines + [usv_line] + list(bars) + [metrics_text])
     
     # 创建动画
-    anim = animation.FuncAnimation(fig, animate, frames=render_steps, 
+    anim = animation.FuncAnimation(fig, animate, frames=render_length, 
                                   interval=100, blit=False, repeat=False)
     
     # 添加图例
@@ -285,7 +285,7 @@ USV Position: [{env.usv_xy[0]:.1f}, {env.usv_xy[1]:.1f}]
 
 def main():
     parser = argparse.ArgumentParser(description='Environment Visualization')
-    parser.add_argument('--render_steps', type=int, default=200,
+    parser.add_argument('--render_length', type=int, default=200,
                        help='Number of steps to render (default: 200)')
     parser.add_argument('--load_ep', type=int, default=None,
                        help='Load trained model episode number (optional)')
@@ -339,7 +339,7 @@ def main():
     # 创建可视化
     print("Starting environment visualization...")
     print("Tip: Close window to stop visualization")
-    anim = create_visualization(env, agents, args.render_steps, args.save_gif)
+    anim = create_visualization(env, agents, args.render_length, args.save_gif)
     
     if not args.save_gif:
         plt.show()
