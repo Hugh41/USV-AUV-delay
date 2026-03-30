@@ -269,10 +269,10 @@ def run_single_episode(env, agents, use_stackelberg=True, delay_scenario=0.0,
     detJ_values = [calculate_detJ(env)]
     detJ_timestamps = [0]
     
-    # USV位置变化记录（与compare_stackelberg.py保持一致）
+    # USV位置变化记录
     usv_position_changes = [0]  # 初始位置变化为0
     
-    # 轨迹记录（与compare_stackelberg.py保持一致）
+    # 轨迹记录
     x_auv = [[] for _ in range(env.N_AUV)]
     y_auv = [[] for _ in range(env.N_AUV)]
     x_usv = []
@@ -382,16 +382,16 @@ def run_single_episode(env, agents, use_stackelberg=True, delay_scenario=0.0,
             avg_delay = total_delay / delay_count if delay_count > 0 else 0.0
             avg_packet_loss_rate = total_packet_loss / packet_count if packet_count > 0 else 0.0
             
-            # 计算平均detJ值（与compare_stackelberg.py保持一致）
+            # 计算平均detJ值
             avg_detJ = np.mean(detJ_values) if len(detJ_values) > 0 else 0
             max_detJ = np.max(detJ_values) if len(detJ_values) > 0 else 0
             min_detJ = np.min(detJ_values) if len(detJ_values) > 0 else 0
             
-            # 计算USV平均移动距离（与compare_stackelberg.py保持一致）
+            # 计算USV平均移动距离
             avg_usv_move = np.mean(usv_position_changes) if len(usv_position_changes) > 0 else 0
             total_usv_move = np.sum(usv_position_changes)
             
-            # 计算平均跟踪误差（与compare_stackelberg.py保持一致：列表格式）
+            # 计算平均跟踪误差（列表格式，每个AUV独立统计）
             avg_tracking_error = [
                 np.mean(tracking_error[i]) for i in range(env.N_AUV)
             ]
@@ -404,21 +404,21 @@ def run_single_episode(env, agents, use_stackelberg=True, delay_scenario=0.0,
                 "idu": int(idu),  # 数据更新次数（与comparison_results一致）
                 "Ec": float(Ec),  # 平均能耗（与comparison_results一致）
                 "N_DO": float(N_DO),  # 数据溢出率（与comparison_results一致）
-                "crash": int(crash),  # 碰撞次数（与compare_stackelberg.py保持一致）
+                "crash": int(crash),  # 碰撞次数
                 "FX": [float(x) for x in FX.tolist()] if isinstance(FX, np.ndarray) else FX,  # 边界穿越（与comparison_results一致）
                 "avg_detJ": float(avg_detJ),  # 平均Fisher信息矩阵detJ
                 "max_detJ": float(max_detJ),  # 最大Fisher信息矩阵detJ
                 "min_detJ": float(min_detJ),  # 最小Fisher信息矩阵detJ
-                "avg_usv_move": float(avg_usv_move),  # USV平均移动距离（与compare_stackelberg.py保持一致）
-                "total_usv_move": float(total_usv_move),  # USV总移动距离（与compare_stackelberg.py保持一致）
-                "avg_tracking_error": avg_tracking_error,  # 平均跟踪误差（列表格式，与compare_stackelberg.py保持一致）
+                "avg_usv_move": float(avg_usv_move),  # USV平均移动距离
+                "total_usv_move": float(total_usv_move),  # USV总移动距离
+                "avg_tracking_error": avg_tracking_error,  # 平均跟踪误差（列表格式）
                 "detJ_values": [float(x) for x in detJ_values],  # detJ值序列
                 "detJ_timestamps": [int(x) for x in detJ_timestamps],  # detJ时间戳
-                "x_auv": x_auv,  # AUV轨迹x坐标（与compare_stackelberg.py保持一致）
-                "y_auv": y_auv,  # AUV轨迹y坐标（与compare_stackelberg.py保持一致）
-                "x_usv": x_usv,  # USV轨迹x坐标（与compare_stackelberg.py保持一致）
-                "y_usv": y_usv,  # USV轨迹y坐标（与compare_stackelberg.py保持一致）
-                "tracking_error": tracking_error,  # 跟踪误差序列（与compare_stackelberg.py保持一致）
+                "x_auv": x_auv,  # AUV轨迹x坐标
+                "y_auv": y_auv,  # AUV轨迹y坐标
+                "x_usv": x_usv,  # USV轨迹x坐标
+                "y_usv": y_usv,  # USV轨迹y坐标
+                "tracking_error": tracking_error,  # 跟踪误差序列
                 # 环境静态信息（用于可视化）
                 "SoPcenter": env.SoPcenter.tolist() if isinstance(env.SoPcenter, np.ndarray) else env.SoPcenter,
                 "lda": env.lda,
@@ -708,7 +708,7 @@ def run_delay_comparison_experiment():
             stackelberg_results.append(metrics)
         print(f"  ✓ 完成Stackelberg方法实验")
         
-        # 计算统计信息（与compare_stackelberg.py保持一致）
+        # 计算统计信息
         def calculate_stats(results):
             """计算统计信息"""
             stats = {}

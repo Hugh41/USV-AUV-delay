@@ -85,12 +85,10 @@ USV-AUV-delay/
 ├── train_dsac.py                   # Train AUV followers (DSAC-T)
 ├── eval_td3.py                     # Evaluate trained TD3 policies
 │
-├── compare_delay_stackelberg.py    # Run Table II/III experiments
-├── compare_stackelberg.py          # Run comparison without delay
+├── compare_delay_stackelberg.py    # Run Table II/III experiments (with delay + packet loss)
 ├── run_delay_packetloss_exp.sh     # Batch run all team-size settings
 │
 ├── visualize_env.py                # Animate environment (trained model)
-├── visualize_comparison.py         # Visualise comparison results
 ├── visualize_comparison_delay.py   # Visualise delay-condition results
 │
 ├── create_demo_gif.py              # ★ Generate trajectory comparison GIF
