@@ -523,6 +523,7 @@ def make_team_summary_gif(data_dir: str, output: str,
 
     te_imp = [(t - s) / max(t, 1e-9) * 100 for t, s in zip(te_t, te_s)]
     mv_imp = [(t - s) / max(t, 1e-9) * 100 for t, s in zip(mv_t, mv_s)]
+    dj_imp = [(s - t) / max(t, 1e-9) * 100 for t, s in zip(dj_t, dj_s)]  # higher FIM is better
 
     # ── build animated bar frames ──
     # Animate: bars grow from 0 → final value over ~half duration, then hold
@@ -575,6 +576,9 @@ def make_team_summary_gif(data_dir: str, output: str,
     imp_txts2 = [ax2.text(i, 0, '', ha='center', va='bottom',
                            color='#F1C40F', fontsize=8.5, fontweight='bold', zorder=5)
                  for i in range(3)]
+    imp_txts3 = [ax3.text(i, 0, '', ha='center', va='bottom',
+                           color='#F1C40F', fontsize=8.5, fontweight='bold', zorder=5)
+                 for i in range(3)]
 
     def lerp(target, fi):
         frac = min(fi / max(grow_frames - 1, 1), 1.0)
@@ -601,13 +605,16 @@ def make_team_summary_gif(data_dir: str, output: str,
         for i in range(3):
             h_te = max(lerp(te_t, fi)[i], lerp(te_s, fi)[i])
             h_mv = max(lerp(mv_t, fi)[i], lerp(mv_s, fi)[i])
+            h_dj = max(lerp(dj_t, fi)[i], lerp(dj_s, fi)[i])
             imp_txts1[i].set_text(f'↓{te_imp[i]*frac:.0f}%')
             imp_txts1[i].set_position((i, h_te * 1.03))
             imp_txts2[i].set_text(f'↓{mv_imp[i]*frac:.0f}%')
             imp_txts2[i].set_position((i, h_mv * 1.03))
+            imp_txts3[i].set_text(f'↑{dj_imp[i]*frac:.0f}%')
+            imp_txts3[i].set_position((i, h_dj * 1.03))
 
         return (*bars1_t, *bars1_s, *bars2_t, *bars2_s,
-                *bars3_t, *bars3_s, *imp_txts1, *imp_txts2)
+                *bars3_t, *bars3_s, *imp_txts1, *imp_txts2, *imp_txts3)
 
     ani = animation.FuncAnimation(fig, update, frames=total_frames,
                                    interval=1000//fps, blit=True)
