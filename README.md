@@ -99,9 +99,6 @@ Models are saved to `models_{type}_{N_AUV}AUV_{Nu}/`.
 ```bash
 # Single run: 3 AUVs, TD3, 50 trials
 python compare_delay_stackelberg.py --N_AUV 3 --model_type td3 --repeat_num 50
-
-# Batch: all team sizes × both backbones
-bash run_delay_packetloss_exp.sh
 ```
 
 Key arguments for `compare_delay_stackelberg.py`:
@@ -124,11 +121,8 @@ Results are saved to `delay_comparison_results/`.
 # Animate trained policy in environment
 python visualize_env.py --N_AUV 3 --load_ep 500
 
-# Save animation as GIF
-python visualize_env.py --N_AUV 3 --load_ep 500 --save_gif
-
-# Plot comparison results from a specific file
-python visualize_comparison_delay.py --result_file delay_comparison_results/.../result.json
+# Plot comparison results
+python visualize_comparison_delay.py
 ```
 
 Key arguments for `visualize_env.py`:
