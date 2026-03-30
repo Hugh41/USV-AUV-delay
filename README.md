@@ -158,32 +158,7 @@ bash run_delay_packetloss_exp.sh
 
 Results are saved to `delay_comparison_results/`.
 
-### 3 — Generate Demo GIFs
-
-```bash
-# Generate all 3 GIFs at once (requires delay_comparison_results/)
-python figures/generate_gifs.py \
-    --data_dir delay_comparison_results \
-    --n_auv 3 --model td3
-
-# Or generate individually
-python figures/create_demo_gif.py    # trajectory comparison
-python figures/create_metrics_gif.py # real-time metrics
-```
-
-GIFs are written to `figures/`.
-
-### 4 — Reproduce Paper Figures (Fig. 1–9)
-
-```bash
-python figures/plot_episode_frontier_delay.py       # Fig. 1
-python figures/plot_td3_auv_panels.py               # Fig. 2-4
-python figures/plot_td3_usv_occupancy_heatmaps.py   # Fig. 5-6
-python figures/plot_phasewise_tracking_advantage.py # Fig. 7
-python figures/plot_delay_compensation_phase_map.py # Fig. 8-9
-```
-
-### 5 — Visualise Live Environment
+### 3 — Visualise Live Environment
 
 ```bash
 python visualize_env.py --N_AUV 3 --load_ep 500
