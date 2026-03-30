@@ -131,7 +131,7 @@ Key arguments for `visualize_env.py`:
 |---|---|---|
 | `--N_AUV` | 2 | Number of AUVs |
 | `--load_ep` | — | Model checkpoint to load |
-| `--max_steps` | 200 | Steps to animate |
+| `--render_steps` | 200 | Number of steps to render |
 | `--episode_length` | 1000 | Full episode length |
 | `--save_gif` | false | Save animation as GIF |
 
