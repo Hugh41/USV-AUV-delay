@@ -14,25 +14,34 @@ Official simulation code for the paper:
 
 ## Demo
 
-### Trajectory Comparison: Stackelberg vs Baseline
-
-> *Left: Baseline (traditional FIM, updates every step).  
-> Right: **Proposed** (Stackelberg + Phase-Aware RL, updates every $N_u = 5$ steps).*
-
-<p align="center">
-  <img src="README.assets/trajectory_3auv.gif" width="860" alt="Trajectory comparison GIF"/>
-</p>
-
-**Key visual observation:** The proposed framework keeps the USV within a compact operating corridor
-(amber diamond) while AUVs maintain broad coverage of sensor nodes.
-The baseline USV wanders across the workspace, racking up ~4× more surface motion.
+> All animations are generated from **real experiment data** (50 trials × TD3/DSAC-T, acoustic delay + Rayleigh packet loss).
 
 ---
 
-### Real-Time Metrics: Tracking Error / FIM Stability / USV Motion
+### Trajectory Comparison: Stackelberg vs Baseline
+
+> *Left: Baseline (traditional FIM).  Right: **Proposed** (Stackelberg + Phase-Aware RL, $N_u = 5$).*
+
+| 2 AUVs | 3 AUVs | 4 AUVs |
+|:------:|:------:|:------:|
+| <img src="README.assets/trajectory_2auv.gif" width="280"/> | <img src="README.assets/trajectory_3auv.gif" width="280"/> | <img src="README.assets/trajectory_4auv.gif" width="280"/> |
+
+**Key observation:** Proposed USV stays in a compact corridor (~0.9 km total) vs baseline (~3.6 km), while AUVs maintain full sensor-node coverage.
+
+---
+
+### Real-Time Metrics: Tracking Error / FIM / USV Motion  (mean ± std, 50 episodes)
+
+| 2 AUVs | 3 AUVs | 4 AUVs |
+|:------:|:------:|:------:|
+| <img src="README.assets/metrics_2auv.gif" width="280"/> | <img src="README.assets/metrics_3auv.gif" width="280"/> | <img src="README.assets/metrics_4auv.gif" width="280"/> |
+
+---
+
+### RL Backbone Comparison: TD3 vs DSAC-T  (Stackelberg, 3 AUVs)
 
 <p align="center">
-  <img src="README.assets/metrics_3auv.gif" width="860" alt="Metrics comparison GIF"/>
+  <img src="README.assets/td3_vs_dsac_3auv.gif" width="860" alt="TD3 vs DSAC comparison GIF"/>
 </p>
 
 ---
@@ -40,7 +49,7 @@ The baseline USV wanders across the workspace, racking up ~4× more surface moti
 ### Advantage Across Team Sizes (2 / 3 / 4 AUVs)
 
 <p align="center">
-  <img src="README.assets/team_size_summary.gif" width="860" alt="Team size summary GIF"/>
+  <img src="README.assets/team_size_summary.gif" width="680" alt="Team size summary GIF"/>
 </p>
 
 | Metric | Baseline | **Proposed** | Improvement |
