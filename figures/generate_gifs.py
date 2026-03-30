@@ -159,7 +159,7 @@ def make_trajectory_gif(data_file: str, output: str,
                    color=C_TRAD, fontsize=11, fontweight='bold', pad=6)
     ax_r.set_title(f'Proposed  (Stackelberg + Phase-Aware RL, {n_auv} AUVs)',
                    color=C_STACK, fontsize=11, fontweight='bold', pad=6)
-    fig.suptitle('USV–AUV Collaboration under Acoustic Delay & Rayleigh Packet Loss',
+    fig.suptitle(f'USV–AUV Collaboration under Acoustic Delay & Rayleigh Packet Loss  ({n_auv} AUVs · 1000 Steps)',
                  color=C_TEXT, fontsize=12.5, fontweight='bold', y=0.96)
 
     # sensor nodes
@@ -327,7 +327,7 @@ def make_metrics_gif(data_file: str, output: str,
     ax_br = fig.add_subplot(gs[1, 1], facecolor=C_PANEL)
 
     fig.suptitle(
-        f'Real-Time Performance Metrics  ({n_auv} AUVs · TD3 · Acoustic Delay + Packet Loss)',
+        f'Real-Time Performance Metrics  ({n_auv} AUVs · TD3 · 1000 Steps · Acoustic Delay + Packet Loss)',
         color=C_TEXT, fontsize=11, fontweight='bold', y=0.95)
 
     for ax, title, ylab in [
@@ -532,7 +532,7 @@ def make_team_summary_gif(data_dir: str, output: str,
 
     fig = plt.figure(figsize=(14, 7), facecolor=C_BG)
     fig.suptitle(
-        f'Algorithm Advantage Across Team Sizes  (TD3 · 50 Runs each · Delay + Packet Loss)',
+        f'Algorithm Advantage Across Team Sizes  (TD3 · 50 Episodes each · Delay + Packet Loss)',
         color=C_TEXT, fontsize=12, fontweight='bold', y=0.97)
 
     gs = gridspec.GridSpec(1, 3, wspace=0.38, left=0.07, right=0.97, top=0.86, bottom=0.14)
@@ -619,6 +619,283 @@ def make_team_summary_gif(data_dir: str, output: str,
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# GIF 4 – TD3 vs DSAC-T Comparison (Stackelberg, fixed N_AUV)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def make_td3_dsac_gif(data_dir: str, output: str, n_auv: int = 3,
+                      fps: int = 15, duration: float = 12.0, trail: int = 100):
+    print(f'\n[GIF 4] TD3 vs DSAC-T → {output}')
+
+    files_td3  = find_files(data_dir, n_auv, 'td3')
+    files_dsac = find_files(data_dir, n_auv, 'dsac')
+    if not files_td3 or not files_dsac:
+        print(f'  SKIP: missing td3 or dsac files for N_AUV={n_auv}')
+        return
+
+    data_td3  = load_result(files_td3[0])
+    data_dsac = load_result(files_dsac[0])
+
+    ep_td3  = pick_median_episode(get_episodes(data_td3,  'stackelberg'))
+    ep_dsac = pick_median_episode(get_episodes(data_dsac, 'stackelberg'))
+
+    T_auv = np.array(ep_td3['x_auv']).shape[1]
+
+    xu_td3  = align_usv(np.array(ep_td3['x_usv']),  T_auv)
+    yu_td3  = align_usv(np.array(ep_td3['y_usv']),  T_auv)
+    xu_dsac = align_usv(np.array(ep_dsac['x_usv']), T_auv)
+    yu_dsac = align_usv(np.array(ep_dsac['y_usv']), T_auv)
+
+    xa_td3  = np.array(ep_td3['x_auv']);  ya_td3  = np.array(ep_td3['y_auv'])
+    xa_dsac = np.array(ep_dsac['x_auv']); ya_dsac = np.array(ep_dsac['y_auv'])
+
+    te_td3  = [smooth(ep_td3['tracking_error'][i])  for i in range(n_auv)]
+    te_dsac = [smooth(ep_dsac['tracking_error'][i]) for i in range(n_auv)]
+
+    sns = np.array(ep_td3.get('SoPcenter', ep_dsac.get('SoPcenter', [])))
+    lda = ep_td3.get('lda', [5] * len(sns))
+
+    T = T_auv
+    total_frames = int(fps * duration)
+    step = max(1, T // total_frames)
+    frame_ts = list(range(0, T, step))
+
+    # collect mean/std over all episodes for bottom panels
+    eps_td3  = get_episodes(data_td3,  'stackelberg')
+    eps_dsac = get_episodes(data_dsac, 'stackelberg')
+
+    def collect_mean(eps, key):
+        seqs = []
+        for ep in eps:
+            arr = np.array(ep[key])
+            if arr.ndim == 2: arr = arr.mean(0)
+            seqs.append(arr)
+        ml = min(len(s) for s in seqs)
+        mat = np.stack([s[:ml] for s in seqs])
+        return mat.mean(0), mat.std(0), ml
+
+    te_td3_m,  te_td3_s,  T_te  = collect_mean(eps_td3,  'tracking_error')
+    te_dsac_m, te_dsac_s, _     = collect_mean(eps_dsac, 'tracking_error')
+    dj_td3_m,  dj_td3_s,  T_dj  = collect_mean(eps_td3,  'detJ_values')
+    dj_dsac_m, dj_dsac_s, _     = collect_mean(eps_dsac, 'detJ_values')
+
+    T2 = min(T_te, T_dj, T_auv)
+    te_td3_m  = smooth(te_td3_m[:T2],  sigma=6)
+    te_dsac_m = smooth(te_dsac_m[:T2], sigma=6)
+    dj_td3_m  = smooth(dj_td3_m[:T2],  sigma=6)
+    dj_dsac_m = smooth(dj_dsac_m[:T2], sigma=6)
+
+    def usv_cumdist_mean(eps):
+        mats = []
+        for ep in eps:
+            xu = align_usv(np.array(ep['x_usv']), T_auv)
+            yu = align_usv(np.array(ep['y_usv']), T_auv)
+            cd = np.concatenate([[0], np.cumsum(np.hypot(np.diff(xu), np.diff(yu)))])
+            mats.append(cd[:T2])
+        mat = np.stack(mats)
+        return mat.mean(0), mat.std(0)
+
+    cd_td3_m,  cd_td3_s  = usv_cumdist_mean(eps_td3)
+    cd_dsac_m, cd_dsac_s = usv_cumdist_mean(eps_dsac)
+
+    # ── figure ──
+    C_TD3  = '#3498DB'
+    C_DSAC = '#F39C12'
+
+    fig = plt.figure(figsize=(18, 9), facecolor=C_BG)
+    fig.suptitle(
+        f'Stackelberg Framework — TD3 vs DSAC-T  ({n_auv} AUVs · 1000 Steps · Acoustic Delay + Packet Loss)',
+        color=C_TEXT, fontsize=12, fontweight='bold', y=0.97)
+
+    gs = gridspec.GridSpec(2, 3, hspace=0.40, wspace=0.30,
+                           left=0.05, right=0.97, top=0.90, bottom=0.08)
+    ax_l  = fig.add_subplot(gs[0, 0], facecolor=C_PANEL)
+    ax_r  = fig.add_subplot(gs[0, 1], facecolor=C_PANEL)
+    ax_br_top = fig.add_subplot(gs[0, 2], facecolor=C_PANEL)
+    ax_te = fig.add_subplot(gs[1, 0], facecolor=C_PANEL)
+    ax_dj = fig.add_subplot(gs[1, 1], facecolor=C_PANEL)
+    ax_cd = fig.add_subplot(gs[1, 2], facecolor=C_PANEL)
+
+    col = AUV_COLORS[:n_auv]
+
+    for ax, title, c in [(ax_l, f'TD3 Trajectory  ({n_auv} AUVs)', C_TD3),
+                          (ax_r, f'DSAC-T Trajectory  ({n_auv} AUVs)', C_DSAC)]:
+        ax.set_title(title, color=c, fontsize=10, fontweight='bold', pad=4)
+        ax.set_xlim(-5, 205); ax.set_ylim(-5, 205)
+        ax.set_aspect('equal', adjustable='box')
+        ax.tick_params(colors=C_SUB, labelsize=7)
+        ax.set_xlabel('X (m)', color=C_SUB, fontsize=8)
+        ax.set_ylabel('Y (m)', color=C_SUB, fontsize=8)
+        for sp in ax.spines.values(): sp.set_edgecolor(C_GRID)
+        ax.grid(color=C_GRID, linewidth=0.4, alpha=0.5)
+
+    if len(sns) > 0:
+        max_lda = max(lda) if max(lda) > 0 else 1
+        for ax in (ax_l, ax_r):
+            for (sx, sy), ld in zip(sns, lda):
+                ax.scatter(sx, sy, s=22, c=[[0.58, 0.32, 0.80]],
+                           alpha=0.3 + 0.5 * ld / max_lda, zorder=2, linewidths=0)
+
+    trail_u_l,  = ax_l.plot([], [], '-', color=C_USV, lw=1.3, alpha=0.55, zorder=3)
+    trail_u_r,  = ax_r.plot([], [], '-', color=C_USV, lw=1.3, alpha=0.55, zorder=3)
+    tr_a_l = [ax_l.plot([], [], '-', color=col[i], lw=0.9, alpha=0.35, zorder=3)[0] for i in range(n_auv)]
+    tr_a_r = [ax_r.plot([], [], '-', color=col[i], lw=0.9, alpha=0.35, zorder=3)[0] for i in range(n_auv)]
+    dot_u_l = ax_l.scatter([], [], s=100, c=[C_USV], marker='D', zorder=6, linewidths=0.6, edgecolors='white')
+    dot_u_r = ax_r.scatter([], [], s=100, c=[C_USV], marker='D', zorder=6, linewidths=0.6, edgecolors='white')
+    dots_l = [ax_l.scatter([], [], s=60, c=[col[i]], marker='o', zorder=5, linewidths=0.4, edgecolors='white') for i in range(n_auv)]
+    dots_r = [ax_r.scatter([], [], s=60, c=[col[i]], marker='o', zorder=5, linewidths=0.4, edgecolors='white') for i in range(n_auv)]
+
+    def mbox(ax, x, y, s, c):
+        return ax.text(x, y, s, transform=ax.transAxes, color=c,
+                       fontsize=8, fontweight='bold', va='top', ha='left', zorder=10,
+                       bbox=dict(boxstyle='round,pad=0.3', fc='#080E1C', ec=c, alpha=0.88))
+
+    tb_te = mbox(ax_l, 0.02, 0.97, '', C_TD3)
+    tb_mv = mbox(ax_l, 0.02, 0.84, '', C_USV)
+    ts_te = mbox(ax_r, 0.02, 0.97, '', C_DSAC)
+    ts_mv = mbox(ax_r, 0.02, 0.84, '', C_USV)
+    ts_imp = mbox(ax_r, 0.50, 0.97, '', '#F1C40F')
+
+    # bar chart top-right
+    ax_br_top.set_title('Final Summary', color=C_TEXT, fontsize=9, fontweight='bold', pad=4)
+    bar_lbls = ['Track\nErr (m)', 'USV Dist\n(km)', 'detJ\n(×1e-7)']
+    bars_td3  = ax_br_top.bar(np.arange(3) - 0.2, [0]*3, 0.38, color=C_TD3,  alpha=0.88, label='TD3')
+    bars_dsac = ax_br_top.bar(np.arange(3) + 0.2, [0]*3, 0.38, color=C_DSAC, alpha=0.88, label='DSAC-T')
+    ax_br_top.set_xticks(range(3))
+    ax_br_top.set_xticklabels(bar_lbls, color=C_TEXT, fontsize=8)
+    ax_br_top.tick_params(colors=C_SUB, labelsize=7)
+    for sp in ax_br_top.spines.values(): sp.set_edgecolor(C_GRID)
+    ax_br_top.grid(color=C_GRID, linewidth=0.4, alpha=0.5)
+    ax_br_top.legend(fontsize=7.5, facecolor='#0D1526', labelcolor=C_TEXT,
+                     edgecolor=C_GRID, framealpha=0.85)
+    br_imp_txts = [ax_br_top.text(i, 0, '', ha='center', va='bottom',
+                                   color='#F1C40F', fontsize=7.5, fontweight='bold', zorder=5)
+                   for i in range(3)]
+
+    # bottom time-series
+    t_ax2 = np.arange(T2)
+    for ax, ym1, ys1, ym2, ys2 in [
+        (ax_te, te_td3_m, te_td3_s[:T2], te_dsac_m, te_dsac_s[:T2]),
+        (ax_dj, dj_td3_m, dj_td3_s[:T2], dj_dsac_m, dj_dsac_s[:T2]),
+    ]:
+        ax.fill_between(t_ax2, np.maximum(0, ym1 - ys1), ym1 + ys1, color=C_TD3,  alpha=0.10)
+        ax.fill_between(t_ax2, np.maximum(0, ym2 - ys2), ym2 + ys2, color=C_DSAC, alpha=0.10)
+
+    ax_cd.fill_between(t_ax2, cd_td3_m - cd_td3_s[:T2], cd_td3_m + cd_td3_s[:T2],
+                       color=C_TD3, alpha=0.10)
+    ax_cd.fill_between(t_ax2, cd_dsac_m - cd_dsac_s[:T2], cd_dsac_m + cd_dsac_s[:T2],
+                       color=C_DSAC, alpha=0.10)
+
+    line_te_td3,  = ax_te.plot([], [], color=C_TD3,  lw=1.8, label='TD3')
+    line_te_dsac, = ax_te.plot([], [], color=C_DSAC, lw=1.8, label='DSAC-T')
+    line_dj_td3,  = ax_dj.plot([], [], color=C_TD3,  lw=1.8, label='TD3')
+    line_dj_dsac, = ax_dj.plot([], [], color=C_DSAC, lw=1.8, label='DSAC-T')
+    line_cd_td3,  = ax_cd.plot([], [], color=C_TD3,  lw=1.8, label='TD3')
+    line_cd_dsac, = ax_cd.plot([], [], color=C_DSAC, lw=1.8, label='DSAC-T')
+
+    for ax, title, ylab in [
+        (ax_te, 'Tracking Error',       'Error (m)'),
+        (ax_dj, 'FIM det(J)',           'det(J)'),
+        (ax_cd, 'Cumul. USV Motion',    'Distance (m)'),
+    ]:
+        ax.set_title(title, color=C_TEXT, fontsize=9, fontweight='bold', pad=4)
+        ax.set_ylabel(ylab, color=C_SUB, fontsize=8)
+        ax.set_xlabel('Timestep', color=C_SUB, fontsize=8)
+        ax.tick_params(colors=C_SUB, labelsize=7)
+        for sp in ax.spines.values(): sp.set_edgecolor(C_GRID)
+        ax.grid(color=C_GRID, linewidth=0.4, alpha=0.5)
+        ax.set_xlim(0, T2)
+        ax.legend(fontsize=7.5, facecolor='#0D1526', labelcolor=C_TEXT,
+                  edgecolor=C_GRID, framealpha=0.85, loc='upper right')
+
+    ax_te.set_ylim(0, max(te_td3_m.max(), te_dsac_m.max()) * 1.15)
+    ax_dj.set_ylim(0, max(dj_td3_m.max(), dj_dsac_m.max()) * 1.15)
+    ax_cd.set_ylim(0, max(cd_td3_m.max(), cd_dsac_m.max()) * 1.10)
+
+    vline_te = ax_te.axvline(0, color=C_TEXT, lw=0.7, alpha=0.5, ls='--')
+    vline_dj = ax_dj.axvline(0, color=C_TEXT, lw=0.7, alpha=0.5, ls='--')
+    vline_cd = ax_cd.axvline(0, color=C_TEXT, lw=0.7, alpha=0.5, ls='--')
+
+    time_txt = fig.text(0.5, 0.01, '', ha='center', color=C_SUB, fontsize=8)
+
+    def update(fi):
+        t = frame_ts[fi]
+        lo = max(0, t - trail)
+
+        trail_u_l.set_data(xu_td3[lo:t+1],  yu_td3[lo:t+1])
+        trail_u_r.set_data(xu_dsac[lo:t+1], yu_dsac[lo:t+1])
+        dot_u_l.set_offsets([[xu_td3[t],  yu_td3[t]]])
+        dot_u_r.set_offsets([[xu_dsac[t], yu_dsac[t]]])
+        for i in range(n_auv):
+            tr_a_l[i].set_data(xa_td3[i, lo:t+1],  ya_td3[i, lo:t+1])
+            tr_a_r[i].set_data(xa_dsac[i, lo:t+1], ya_dsac[i, lo:t+1])
+            dots_l[i].set_offsets([[xa_td3[i, t],  ya_td3[i, t]]])
+            dots_r[i].set_offsets([[xa_dsac[i, t], ya_dsac[i, t]]])
+
+        te_now_td3  = np.mean([te_td3[i][min(t, len(te_td3[i])-1)]  for i in range(n_auv)])
+        te_now_dsac = np.mean([te_dsac[i][min(t, len(te_dsac[i])-1)] for i in range(n_auv)])
+        dist_td3  = float(np.sum(np.hypot(np.diff(xu_td3[:t+1]),  np.diff(yu_td3[:t+1]))))
+        dist_dsac = float(np.sum(np.hypot(np.diff(xu_dsac[:t+1]), np.diff(yu_dsac[:t+1]))))
+
+        tb_te.set_text(f'Track Err: {te_now_td3:.3f} m')
+        tb_mv.set_text(f'USV Dist:  {dist_td3/1000:.2f} km')
+        ts_te.set_text(f'Track Err: {te_now_dsac:.3f} m')
+        ts_mv.set_text(f'USV Dist:  {dist_dsac/1000:.2f} km')
+        te_imp = (te_now_td3 - te_now_dsac) / max(te_now_td3, 1e-6) * 100
+        sign = '↓' if te_imp > 0 else '↑'
+        ts_imp.set_text(f'DSAC-T {sign}{abs(te_imp):.1f}% Err')
+
+        # bar chart
+        t_clip = min(t, T2 - 1)
+        te_vals = [te_td3_m[t_clip],  te_dsac_m[t_clip]]
+        dj_vals = [dj_td3_m[t_clip],  dj_dsac_m[t_clip]]
+        cd_vals = [cd_td3_m[t_clip] / 1000, cd_dsac_m[t_clip] / 1000]
+
+        bars_td3[0].set_height(te_vals[0]);  bars_dsac[0].set_height(te_vals[1])
+        bars_td3[1].set_height(cd_vals[0]);  bars_dsac[1].set_height(cd_vals[1])
+        bars_td3[2].set_height(dj_vals[0]*1e7); bars_dsac[2].set_height(dj_vals[1]*1e7)
+
+        max_bar = max(te_vals[0], cd_vals[0], dj_vals[0]*1e7, 1e-6)
+        ax_br_top.set_ylim(0, max_bar * 1.4)
+
+        for i, (vt, vs) in enumerate(zip(
+                [te_vals[0], cd_vals[0], dj_vals[0]*1e7],
+                [te_vals[1], cd_vals[1], dj_vals[1]*1e7])):
+            imp = (vt - vs) / max(abs(vt), 1e-12) * 100
+            h = max(vt, vs)
+            sign2 = '↓' if imp > 0 else '↑'
+            br_imp_txts[i].set_text(f'{sign2}{abs(imp):.0f}%')
+            br_imp_txts[i].set_position((i, h * 1.05))
+            br_imp_txts[i].set_color('#2ECC71' if imp > 0 else '#E74C3C')
+
+        ts2 = np.arange(t_clip + 1)
+        line_te_td3.set_data(ts2, te_td3_m[:t_clip+1])
+        line_te_dsac.set_data(ts2, te_dsac_m[:t_clip+1])
+        line_dj_td3.set_data(ts2, dj_td3_m[:t_clip+1])
+        line_dj_dsac.set_data(ts2, dj_dsac_m[:t_clip+1])
+        line_cd_td3.set_data(ts2, cd_td3_m[:t_clip+1])
+        line_cd_dsac.set_data(ts2, cd_dsac_m[:t_clip+1])
+        for v in (vline_te, vline_dj, vline_cd): v.set_xdata([t_clip, t_clip])
+
+        time_txt.set_text(f'Timestep: {t} / {T}  (mean ± std over 50 runs)')
+
+        return (trail_u_l, trail_u_r, dot_u_l, dot_u_r,
+                *tr_a_l, *tr_a_r, *dots_l, *dots_r,
+                tb_te, tb_mv, ts_te, ts_mv, ts_imp,
+                *bars_td3, *bars_dsac, *br_imp_txts,
+                line_te_td3, line_te_dsac, line_dj_td3, line_dj_dsac,
+                line_cd_td3, line_cd_dsac,
+                vline_te, vline_dj, vline_cd, time_txt)
+
+    ani = animation.FuncAnimation(fig, update, frames=len(frame_ts),
+                                   interval=1000//fps, blit=True)
+    os.makedirs(os.path.dirname(output) or '.', exist_ok=True)
+    ani.save(output, writer=animation.PillowWriter(fps=fps, metadata={'loop': 0}), dpi=100)
+    plt.close(fig)
+    kb = os.path.getsize(output) // 1024
+    print(f'  ✓  {output}  ({kb} KB)')
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Main
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -662,6 +939,12 @@ def main():
             args.data_dir,
             os.path.join(args.out_dir, 'team_size_summary.gif'),
             fps=8, duration=6.0, model=args.model)
+
+    if '4' not in args.skip:
+        make_td3_dsac_gif(
+            args.data_dir,
+            os.path.join(args.out_dir, f'td3_vs_dsac_{args.n_auv}auv.gif'),
+            n_auv=args.n_auv, fps=args.fps, duration=12.0)
 
     print('\nDone.  GIFs saved to:', args.out_dir)
 
