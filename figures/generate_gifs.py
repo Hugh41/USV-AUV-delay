@@ -327,7 +327,7 @@ def make_metrics_gif(data_file: str, output: str,
     ax_br = fig.add_subplot(gs[1, 1], facecolor=C_PANEL)
 
     fig.suptitle(
-        f'Real-Time Performance Metrics  ({n_auv} AUVs · TD3 · 50 Episodes · Acoustic Delay + Packet Loss)',
+        f'Real-Time Performance Metrics  ({n_auv} AUVs · TD3 · 1000 Steps · Acoustic Delay + Packet Loss)',
         color=C_TEXT, fontsize=11, fontweight='bold', y=0.95)
 
     for ax, title, ylab in [
@@ -393,6 +393,13 @@ def make_metrics_gif(data_file: str, output: str,
                             color='#F1C40F', fontsize=7.5, fontweight='bold', zorder=5)
                 for i in range(3)]
 
+    # value labels on each individual bar: [te_t, te_s, cd_t, cd_s, dj_t, dj_s]
+    val_fmts  = ['{:.3f}', '{:.3f}', '{:.2f}km', '{:.2f}km', '{:.2f}', '{:.2f}']
+    val_xpos  = [-0.2, 0.2, 0.8, 1.2, 1.8, 2.2]
+    val_txts  = [ax_br.text(xp, 0, '', ha='center', va='bottom',
+                             color='#F1C40F', fontsize=6.5, fontweight='bold', zorder=6)
+                 for xp in val_xpos]
+
     vline_te = ax_te.axvline(0, color=C_TEXT, lw=0.7, alpha=0.5, ls='--')
     vline_dj = ax_dj.axvline(0, color=C_TEXT, lw=0.7, alpha=0.5, ls='--')
     vline_cd = ax_cd.axvline(0, color=C_TEXT, lw=0.7, alpha=0.5, ls='--')
@@ -439,11 +446,23 @@ def make_metrics_gif(data_file: str, output: str,
             imp_txts[i].set_position((i, h * 1.05))
             imp_txts[i].set_color(color)
 
-        time_txt.set_text(f'Timestep: {t} / {T}  (averaged over 50 episodes)')
+        # value labels on each bar
+        bar_vals = [te_vals[0], te_vals[1],
+                    cd_vals[0], cd_vals[1],
+                    dj_vals[0]*1e7, dj_vals[1]*1e7]
+        bar_heights = [bar_ax_br_t[0].get_height(), bar_ax_br_s[0].get_height(),
+                       bar_ax_br_t[1].get_height(), bar_ax_br_s[1].get_height(),
+                       bar_ax_br_t[2].get_height(), bar_ax_br_s[2].get_height()]
+        for j, (txt, fmt, h) in enumerate(zip(val_txts, val_fmts, bar_heights)):
+            label = fmt.format(bar_vals[j])
+            txt.set_text(label)
+            txt.set_position((val_xpos[j], h * 1.02))
+
+        time_txt.set_text(f'Timestep: {t} / {T}  (mean ± std over 50 runs)')
 
         return (line_te_t, line_te_s, line_dj_t, line_dj_s,
                 line_cd_t, line_cd_s, vline_te, vline_dj, vline_cd,
-                *bar_ax_br_t, *bar_ax_br_s, *imp_txts, time_txt)
+                *bar_ax_br_t, *bar_ax_br_s, *imp_txts, *val_txts, time_txt)
 
     ani = animation.FuncAnimation(fig, update, frames=len(frame_ts),
                                    interval=1000//fps, blit=True)
