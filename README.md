@@ -3,10 +3,7 @@
 Training, evaluation and simulation code for the paper:
 
 > **Communication-Aware Time-Scale-Separated Bi-Level Coordination for USV-AUV Collaboration in Underwater Mobile Computing**
-> Jingzehua Xu†, Hongmiaoyi Zhang†, Yubo Huang, Zixi Wang, Junhao Huang, Guanwen Xie, Xiaofan Li
-> *IEEE Transactions on Mobile Computing*, 2026.
-
-<p align="center"><img src="README.assets/Snipaste.png" width="860"/></p>
+> Jingzehua Xu†, Hongmiaoyi Zhang†, Yubo Huang, Zixi Wang, Junhao Huang, Guanwen Xie, Zhijun Zhang
 
 ---
 
@@ -14,9 +11,9 @@ Training, evaluation and simulation code for the paper:
 
 All animations are generated from real experiment data (50 trials × TD3/DSAC-T, acoustic delay + Rayleigh packet loss).
 
-**Trajectory Comparison — Stackelberg vs Baseline**
+**Trajectory Comparison — Proposed Framework vs Baseline**
 
-*Left: Baseline. Right: Proposed (Stackelberg + Phase-Aware RL).*
+*Left: Baseline. Right: Proposed Framework.*
 
 **2 AUVs**
 <p align="center"><img src="README.assets/trajectory_2auv.gif" width="860"/></p>
@@ -38,7 +35,7 @@ All animations are generated from real experiment data (50 trials × TD3/DSAC-T,
 **4 AUVs**
 <p align="center"><img src="README.assets/metrics_4auv.gif" width="860"/></p>
 
-**RL Backbone Comparison: TD3 vs DSAC-T (Stackelberg, 3 AUVs)**
+**RL Backbone Comparison: TD3 vs DSAC-T (Proposed Framework, 3 AUVs)**
 
 <p align="center"><img src="README.assets/td3_vs_dsac_3auv.gif" width="860"/></p>
 
@@ -46,7 +43,7 @@ All animations are generated from real experiment data (50 trials × TD3/DSAC-T,
 
 <p align="center"><img src="README.assets/team_size_summary.gif" width="860"/></p>
 
-**USV Occupancy Heatmap — Stackelberg vs Baseline**
+**USV Occupancy Heatmap — Proposed Framework vs Baseline**
 
 *Proposed framework keeps the USV focused near the AUV cluster (high-density centre), while the baseline drifts widely across the workspace.*
 
@@ -156,14 +153,12 @@ Key arguments for `visualize_env.py`:
   title={Communication-Aware Time-Scale-Separated Bi-Level Coordination
          for {USV-AUV} Collaboration in Underwater Mobile Computing},
   author={Xu, Jingzehua and Zhang, Hongmiaoyi and Huang, Yubo and
-          Wang, Zixi and Huang, Junhao and Xie, Guanwen and Li, Xiaofan},
-  journal={IEEE Transactions on Mobile Computing},
-  year={2026},
-  publisher={IEEE}
+          Wang, Zixi and Huang, Junhao and Xie, Guanwen and Zhang, Zhijun},
+  note={under review}
 }
 ```
 
 ## Acknowledgements
 
 - DSAC-T: [DSAC-v2](https://github.com/Jingliang-Duan/DSAC-v2) (Duan et al., TPAMI 2025)
-- Baseline: [Never Too Cocky to Cooperate](https://arxiv.org/abs/2504.14894) (Xu et al., IEEE TMC 2026)
+- Baseline: [Never Too Cocky to Cooperate](https://arxiv.org/abs/2504.14894) (Xu et al.)

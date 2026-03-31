@@ -26,16 +26,16 @@ from matplotlib.lines import Line2D
 from scipy.ndimage import gaussian_filter1d
 
 # ── colour palette ────────────────────────────────────────────────────────────
-C_TRAD     = '#E74C3C'   # red    – Traditional baseline
-C_STACK    = '#2ECC71'   # green  – Stackelberg proposed
-C_USV      = '#F39C12'   # amber  – USV
-C_SN       = '#9B59B6'   # purple – sensor node
-C_BG       = '#0B1120'   # dark background
-C_PANEL    = '#111827'   # panel bg
-C_GRID     = '#1F2D45'
-C_TEXT     = '#ECF0F1'
-C_SUB      = '#8899AA'
-AUV_COLORS = ['#3498DB', '#E67E22', '#1ABC9C', '#9B59B6']
+C_TRAD     = '#C0392B'   # red    – Traditional baseline
+C_STACK    = '#27AE60'   # green  – Proposed framework
+C_USV      = '#D35400'   # orange – USV
+C_SN       = '#8E44AD'   # purple – sensor node
+C_BG       = '#FFFFFF'   # white background
+C_PANEL    = '#F5F6FA'   # panel bg
+C_GRID     = '#CCCCCC'
+C_TEXT     = '#1A1A2E'
+C_SUB      = '#555555'
+AUV_COLORS = ['#2980B9', '#E67E22', '#16A085', '#8E44AD']
 
 
 # ── data loading ─────────────────────────────────────────────────────────────
@@ -157,7 +157,7 @@ def make_trajectory_gif(data_file: str, output: str,
 
     ax_l.set_title(f'Baseline  (Traditional FIM, {n_auv} AUVs)',
                    color=C_TRAD, fontsize=11, fontweight='bold', pad=6)
-    ax_r.set_title(f'Proposed  (Stackelberg + Phase-Aware RL, {n_auv} AUVs)',
+    ax_r.set_title(f'Proposed Framework  ({n_auv} AUVs)',
                    color=C_STACK, fontsize=11, fontweight='bold', pad=6)
     fig.suptitle(f'USV–AUV Collaboration under Acoustic Delay & Rayleigh Packet Loss  ({n_auv} AUVs · 1000 Steps)',
                  color=C_TEXT, fontsize=12.5, fontweight='bold', y=0.96)
@@ -193,7 +193,7 @@ def make_trajectory_gif(data_file: str, output: str,
     tb_mv = mbox(ax_l, 0.02, 0.84, '', C_USV)
     ts_te = mbox(ax_r, 0.02, 0.97, '', C_STACK)
     ts_mv = mbox(ax_r, 0.02, 0.84, '', C_USV)
-    ts_imp = mbox(ax_r, 0.55, 0.97, '', '#F1C40F')
+    ts_imp = mbox(ax_r, 0.55, 0.97, '', '#E67E00')
 
     ax_b.set_xlim(0, 1); ax_b.set_ylim(0, 1)
     ax_b.fill_between([0, 1], [0.35, 0.35], [0.65, 0.65], color=C_GRID, alpha=0.6)
@@ -209,7 +209,7 @@ def make_trajectory_gif(data_file: str, output: str,
         Line2D([0],[0], marker='o', color='none', markerfacecolor=C_SN, markersize=6, label='Sensor Node'),
     ]
     fig.legend(handles=handles, loc='lower right', ncol=len(handles),
-               fontsize=8, framealpha=0.85, facecolor='#0D1526',
+               fontsize=8, framealpha=0.9, facecolor='white',
                labelcolor=C_TEXT, edgecolor=C_GRID,
                bbox_to_anchor=(0.97, 0.01))
 
@@ -370,7 +370,7 @@ def make_metrics_gif(data_file: str, output: str,
 
     for ax in (ax_te, ax_dj, ax_cd):
         ax.set_xlim(0, T)
-        ax.legend(fontsize=7.5, facecolor='#0D1526', labelcolor=C_TEXT,
+        ax.legend(fontsize=7.5, facecolor='white', labelcolor=C_TEXT,
                   edgecolor=C_GRID, framealpha=0.85, loc='upper right')
 
     ax_te.set_ylim(0, max(te_t_m.max(), te_s_m.max()) * 1.15)
@@ -387,17 +387,17 @@ def make_metrics_gif(data_file: str, output: str,
     ax_br.set_xticklabels(bar_labels, color=C_TEXT, fontsize=8)
     ax_br.set_ylabel('Value', color=C_SUB, fontsize=8)
     ax_br.tick_params(colors=C_SUB, labelsize=7)
-    ax_br.legend(fontsize=7.5, facecolor='#0D1526', labelcolor=C_TEXT,
+    ax_br.legend(fontsize=7.5, facecolor='white', labelcolor=C_TEXT,
                  edgecolor=C_GRID, framealpha=0.85)
     imp_txts = [ax_br.text(i, 0, '', ha='center', va='bottom',
-                            color='#F1C40F', fontsize=7.5, fontweight='bold', zorder=5)
+                            color='#E67E00', fontsize=7.5, fontweight='bold', zorder=5)
                 for i in range(3)]
 
     # value labels on each individual bar: [te_t, te_s, cd_t, cd_s, dj_t, dj_s]
     val_fmts  = ['{:.3f}', '{:.3f}', '{:.2f}km', '{:.2f}km', '{:.2f}', '{:.2f}']
     val_xpos  = [-0.2, 0.2, 0.8, 1.2, 1.8, 2.2]
     val_txts  = [ax_br.text(xp, 0, '', ha='center', va='bottom',
-                             color='#F1C40F', fontsize=6.5, fontweight='bold', zorder=6)
+                             color='#E67E00', fontsize=6.5, fontweight='bold', zorder=6)
                  for xp in val_xpos]
 
     vline_te = ax_te.axvline(0, color=C_TEXT, lw=0.7, alpha=0.5, ls='--')
@@ -563,7 +563,7 @@ def make_team_summary_gif(data_dir: str, output: str,
     bars3_s = ax3.bar(x + bw/2, [0]*3, bw, color=C_STACK, alpha=0.88, label='Proposed', zorder=3)
 
     for ax in (ax1, ax2, ax3):
-        ax.legend(fontsize=8, facecolor='#0D1526', labelcolor=C_TEXT,
+        ax.legend(fontsize=8, facecolor='white', labelcolor=C_TEXT,
                   edgecolor=C_GRID, framealpha=0.85, loc='upper left')
 
     ax1.set_ylim(0, max(te_t + te_s) * 1.35)
@@ -571,13 +571,13 @@ def make_team_summary_gif(data_dir: str, output: str,
     ax3.set_ylim(0, max(dj_t + dj_s) * 1.35)
 
     imp_txts1 = [ax1.text(i, 0, '', ha='center', va='bottom',
-                           color='#F1C40F', fontsize=8.5, fontweight='bold', zorder=5)
+                           color='#E67E00', fontsize=8.5, fontweight='bold', zorder=5)
                  for i in range(3)]
     imp_txts2 = [ax2.text(i, 0, '', ha='center', va='bottom',
-                           color='#F1C40F', fontsize=8.5, fontweight='bold', zorder=5)
+                           color='#E67E00', fontsize=8.5, fontweight='bold', zorder=5)
                  for i in range(3)]
     imp_txts3 = [ax3.text(i, 0, '', ha='center', va='bottom',
-                           color='#F1C40F', fontsize=8.5, fontweight='bold', zorder=5)
+                           color='#E67E00', fontsize=8.5, fontweight='bold', zorder=5)
                  for i in range(3)]
 
     def lerp(target, fi):
@@ -710,7 +710,7 @@ def make_td3_dsac_gif(data_dir: str, output: str, n_auv: int = 3,
 
     fig = plt.figure(figsize=(18, 9), facecolor=C_BG)
     fig.suptitle(
-        f'Stackelberg Framework — TD3 vs DSAC-T  ({n_auv} AUVs · 1000 Steps · Acoustic Delay + Packet Loss)',
+        f'Proposed Framework — TD3 vs DSAC-T  ({n_auv} AUVs · 1000 Steps · Acoustic Delay + Packet Loss)',
         color=C_TEXT, fontsize=12, fontweight='bold', y=0.97)
 
     gs = gridspec.GridSpec(2, 3, hspace=0.40, wspace=0.30,
@@ -760,7 +760,7 @@ def make_td3_dsac_gif(data_dir: str, output: str, n_auv: int = 3,
     tb_mv = mbox(ax_l, 0.02, 0.84, '', C_USV)
     ts_te = mbox(ax_r, 0.02, 0.97, '', C_DSAC)
     ts_mv = mbox(ax_r, 0.02, 0.84, '', C_USV)
-    ts_imp = mbox(ax_r, 0.50, 0.97, '', '#F1C40F')
+    ts_imp = mbox(ax_r, 0.50, 0.97, '', '#E67E00')
 
     # bar chart top-right
     ax_br_top.set_title('Final Summary', color=C_TEXT, fontsize=9, fontweight='bold', pad=4)
@@ -772,10 +772,10 @@ def make_td3_dsac_gif(data_dir: str, output: str, n_auv: int = 3,
     ax_br_top.tick_params(colors=C_SUB, labelsize=7)
     for sp in ax_br_top.spines.values(): sp.set_edgecolor(C_GRID)
     ax_br_top.grid(color=C_GRID, linewidth=0.4, alpha=0.5)
-    ax_br_top.legend(fontsize=7.5, facecolor='#0D1526', labelcolor=C_TEXT,
+    ax_br_top.legend(fontsize=7.5, facecolor='white', labelcolor=C_TEXT,
                      edgecolor=C_GRID, framealpha=0.85)
     br_imp_txts = [ax_br_top.text(i, 0, '', ha='center', va='bottom',
-                                   color='#F1C40F', fontsize=7.5, fontweight='bold', zorder=5)
+                                   color='#E67E00', fontsize=7.5, fontweight='bold', zorder=5)
                    for i in range(3)]
 
     # bottom time-series
@@ -811,7 +811,7 @@ def make_td3_dsac_gif(data_dir: str, output: str, n_auv: int = 3,
         for sp in ax.spines.values(): sp.set_edgecolor(C_GRID)
         ax.grid(color=C_GRID, linewidth=0.4, alpha=0.5)
         ax.set_xlim(0, T2)
-        ax.legend(fontsize=7.5, facecolor='#0D1526', labelcolor=C_TEXT,
+        ax.legend(fontsize=7.5, facecolor='white', labelcolor=C_TEXT,
                   edgecolor=C_GRID, framealpha=0.85, loc='upper right')
 
     ax_te.set_ylim(0, max(te_td3_m.max(), te_dsac_m.max()) * 1.15)
