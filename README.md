@@ -160,6 +160,4 @@ Key arguments for `visualize_env.py`:
 
 ## Acknowledgements
 
-- TD3: [sfujim/TD3](https://github.com/sfujim/TD3) — Fujimoto et al., [Addressing Function Approximation Error in Actor-Critic Methods](https://arxiv.org/abs/1802.09477), ICML 2018
-- DSAC-T: [DSAC-v2](https://github.com/Jingliang-Duan/DSAC-v2) (Duan et al., TPAMI 2025)
 - Baseline: [Never Too Cocky to Cooperate](https://arxiv.org/abs/2504.14894) (Xu et al.)
