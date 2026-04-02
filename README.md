@@ -77,6 +77,10 @@ pip install -r requirements.txt
 cd DSAC-v2 && pip install -e . && cd ..
 ```
 
+## Contributing
+
+Contributions are welcome. For documentation fixes, experiment notes, plotting improvements, or code changes, please see [CONTRIBUTING.md](CONTRIBUTING.md) for the recommended workflow and pull request checklist.
+
 ## Train
 
 ```bash
