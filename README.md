@@ -4,7 +4,6 @@ Training, evaluation and simulation code for the paper:
 
 > **Communication-Aware Time-Scale-Separated Bi-Level Coordination for USV-AUV Collaboration in Underwater Mobile Computing**
 > Jingzehua Xu†, Hongmiaoyi Zhang†, Zhijun Zhang
-> *IEEE Transactions on Mobile Computing* (under review)
 
 ---
 
@@ -166,8 +165,7 @@ Key arguments for `visualize_env.py`:
   title={Communication-Aware Time-Scale-Separated Bi-Level Coordination
          for {USV-AUV} Collaboration in Underwater Mobile Computing},
   author={Xu, Jingzehua and Zhang, Hongmiaoyi and Zhang, Zhijun},
-  journal={IEEE Transactions on Mobile Computing},
-  note={under review}
+  year={2026}
 }
 ```
 
