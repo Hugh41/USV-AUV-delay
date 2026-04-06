@@ -17,16 +17,21 @@ class StackelbergGame:
     Stackelberg博弈求解器类
     """
     
-    def __init__(self, env, agents=None):
+    def __init__(self, env, agents=None, lambda_J=1.0, lambda_u=0.05):
         """
         初始化Stackelberg博弈求解器
         
         Args:
             env: 环境对象
             agents: AUV的TD3智能体列表（可选，用于预测AUV的最优响应）
+            lambda_J: FIM几何质量项权重
+            lambda_u: USV运动正则化项权重（对应论文中的 λ_u）
         """
         self.env = env
         self.agents = agents
+        self.lambda_J = lambda_J
+        self.lambda_u = lambda_u
+        self._prev_usv_xy = None
         
     def follower_best_response(self, usv_position, current_auv_positions, current_states):
         """
@@ -151,16 +156,19 @@ class StackelbergGame:
     
     def leader_objective(self, usv_position, current_auv_positions, current_states):
         """
-        领导者（USV）的目标函数
-        考虑跟随者（AUV）的最优响应，最大化Fisher信息矩阵的detJ值
-        
+        领导者（USV）的目标函数（含运动正则化项）
+
+        最大化: λ_J * det(J(p_u, P_br)) - λ_u * ||p_u - p_{u,t-1}||
+        等价于最小化其负值，即返回:
+            λ_J * neg_detJ + λ_u * ||p_u - prev_usv||
+
         Args:
-            usv_position: USV的位置 [x, y]
+            usv_position: USV的候选位置 [x, y]
             current_auv_positions: 当前AUV位置
             current_states: 当前AUV状态
             
         Returns:
-            neg_detJ: 负的detJ值（用于最小化）
+            scalar: 最小化目标值（越小越好）
         """
         # 计算跟随者的最优响应
         predicted_auv_positions, _ = self.follower_best_response(
@@ -178,8 +186,16 @@ class StackelbergGame:
         
         # 恢复原始AUV位置
         self.env.xy = original_auv_positions
-        
-        return neg_detJ
+
+        # 运动正则化项：惩罚不必要的USV移动（初始化阶段跳过）
+        if self._prev_usv_xy is not None:
+            motion_penalty = self.lambda_u * np.linalg.norm(
+                np.array(usv_position) - np.array(self._prev_usv_xy)
+            )
+        else:
+            motion_penalty = 0.0
+
+        return self.lambda_J * neg_detJ + motion_penalty
     
     def solve_stackelberg(self, current_auv_positions, current_states, init_guess=None):
         """
@@ -200,6 +216,8 @@ class StackelbergGame:
             init_guess = np.mean(current_auv_positions, axis=0) if len(current_auv_positions) > 0 else self.env.usv_xy
         
         if self.env.Ft == 0:
+            # 初始化阶段：全局搜索，不施加运动正则化
+            self._prev_usv_xy = None
             bounds = [
                 (0, self.env.X_max),
                 (0, self.env.Y_max)
@@ -234,6 +252,9 @@ class StackelbergGame:
         )
         
         optimal_usv_position = result.x
+
+        # 更新 prev_usv_xy 以供下次调用的运动正则化项使用
+        self._prev_usv_xy = copy.deepcopy(optimal_usv_position)
         
         # 计算在最优USV位置下，AUV的最优响应
         predicted_auv_positions, predicted_actions = self.follower_best_response(

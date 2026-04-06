@@ -186,18 +186,22 @@ def calculate_detJ(env):
 def apply_delay_to_position(old_xy, current_xy, delay_value):
     """
     根据延迟值调整位置（加权融合）
+
+    对应论文公式：
+        hat_p_{k,t} = w_{k,t} * p_{k,t-1}^buf + (1 - w_{k,t}) * p_{k,t}
+        w_{k,t} = min(tau_t^k / tau_ref, 1),  tau_ref = 1 s
+    延迟越大，旧位置（缓冲值）权重越高。
     
     Args:
-        old_xy: 上一时刻位置
+        old_xy: 上一时刻缓冲位置
         current_xy: 当前真实位置
         delay_value: 延迟值（秒）
     
     Returns:
-        delayed_xy: 延迟后的位置
+        delayed_xy: 融合后的领导侧估计位置
     """
-    # 延迟越大，旧位置权重越高
-    # 限制延迟权重在[0, 1]范围内
-    delay_weight = min(delay_value, 1.0)
+    tau_ref = 1.0  # 归一化参考延迟（秒）
+    delay_weight = min(delay_value / tau_ref, 1.0)
     delayed_xy = delay_weight * old_xy + (1 - delay_weight) * current_xy
     return delayed_xy
 
@@ -314,9 +318,9 @@ def run_single_episode(env, agents, use_stackelberg=True, delay_scenario=0.0,
             
             # 3. 更新观测位置 (仅当收到包时)
             if packet_received:
-                # 根据图片: meas_posit = delay * old + (1-delay) * new
-                # 注意限制权重在[0, 1]
-                weight = min(current_delay, 1.0)
+                # w_{k,t} = min(tau_t^k / tau_ref, 1),  tau_ref = 1 s
+                tau_ref = 1.0
+                weight = min(current_delay / tau_ref, 1.0)
                 delayed_xy = weight * old_xy[i] + (1 - weight) * env.xy[i]
                 env.obs_xy[i][:2] = delayed_xy[:2]
             # 如果丢包，obs_xy保持不变 (Dead Reckoning 或 Hold Last Value)

@@ -50,7 +50,9 @@ phasewise_err.txt
 tmp/
 logs/
 
-# GIF outputs are tracked in figures/ — exclude any large regenerated copies
+# Figure generation scripts and outputs (local use only)
+plot_figures/
+
 docs/
 
 # DSAC-v2 results (large binary files)

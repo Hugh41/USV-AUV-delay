@@ -3,7 +3,16 @@
 Training, evaluation and simulation code for the paper:
 
 > **Communication-Aware Time-Scale-Separated Bi-Level Coordination for USV-AUV Collaboration in Underwater Mobile Computing**
-> Jingzehua Xu†, Hongmiaoyi Zhang†, Yubo Huang, Zixi Wang, Junhao Huang, Guanwen Xie, Zhijun Zhang
+> Jingzehua Xu†, Hongmiaoyi Zhang†, Zhijun Zhang
+> *IEEE Transactions on Mobile Computing* (under review)
+
+---
+
+## Framework Overview
+
+The figure below shows the system model and the proposed communication-aware time-scale-separated bi-level coordination framework. The USV acts as a slower-timescale leader that optimizes FIM-based sensing geometry using stale leader-side information and predicted follower responses. The AUVs act as faster-timescale followers governed by RL policies with communication-phase-aware states. A control-plane delay-and-packet-loss layer evaluates coordination robustness under realistic acoustic communication uncertainty.
+
+<p align="center"><img src="README.assets/framework_overview.png" width="900"/></p>
 
 ---
 
@@ -156,8 +165,8 @@ Key arguments for `visualize_env.py`:
 @article{xu2026communication,
   title={Communication-Aware Time-Scale-Separated Bi-Level Coordination
          for {USV-AUV} Collaboration in Underwater Mobile Computing},
-  author={Xu, Jingzehua and Zhang, Hongmiaoyi and Huang, Yubo and
-          Wang, Zixi and Huang, Junhao and Xie, Guanwen and Zhang, Zhijun},
+  author={Xu, Jingzehua and Zhang, Hongmiaoyi and Zhang, Zhijun},
+  journal={IEEE Transactions on Mobile Computing},
   note={under review}
 }
 ```
