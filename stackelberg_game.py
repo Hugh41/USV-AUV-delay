@@ -158,9 +158,9 @@ class StackelbergGame:
         """
         领导者（USV）的目标函数（含运动正则化项）
 
-        最大化: λ_J * det(J(p_u, P_br)) - λ_u * ||p_u - p_{u,t-1}||
+        最大化: λ_J * det(J(p_u, P_br)) - λ_u * ||p_u - p_{u,t-1}||²  (论文 Eq. 24)
         等价于最小化其负值，即返回:
-            λ_J * neg_detJ + λ_u * ||p_u - prev_usv||
+            λ_J * neg_detJ + λ_u * ||p_u - prev_usv||²
 
         Args:
             usv_position: USV的候选位置 [x, y]
@@ -187,11 +187,11 @@ class StackelbergGame:
         # 恢复原始AUV位置
         self.env.xy = original_auv_positions
 
-        # 运动正则化项：惩罚不必要的USV移动（初始化阶段跳过）
+        # 运动正则化项：λ_u * ||p_u - p_{u,t-1}||²  (对应论文 Eq. 24)
         if self._prev_usv_xy is not None:
             motion_penalty = self.lambda_u * np.linalg.norm(
                 np.array(usv_position) - np.array(self._prev_usv_xy)
-            )
+            ) ** 2
         else:
             motion_penalty = 0.0
 
