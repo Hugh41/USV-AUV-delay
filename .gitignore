@@ -50,9 +50,6 @@ phasewise_err.txt
 tmp/
 logs/
 
-# Figure generation scripts and outputs (local use only)
-plot_figures/
-
 docs/
 
 # DSAC-v2 results (large binary files)
