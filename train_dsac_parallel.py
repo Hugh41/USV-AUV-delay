@@ -195,6 +195,11 @@ def _worker_fn(rank, agent_kwargs_list, shared_usv_xy,
       - polls weights_queue for policy updates
       - pushes (auv_idx, s, a, r, s', done) to transition_queue
     """
+    # Hide all GPUs — workers are CPU-only; prevents PyTorch from
+    # creating a CUDA context (~256 MiB) on every visible GPU.
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
     np.random.seed(rank * 1000 + int(time.time()) % 10000)
 
     # Set up sys.path for DSAC modules inside spawned process

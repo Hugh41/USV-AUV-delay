@@ -75,6 +75,11 @@ def _worker_fn(rank, args_ns, shared_actors, shared_usv_xy,
     - Uses shared_usv_xy as the current USV position (learner keeps it updated).
     - Sends (state, action, reward, next_state) tuples via transition_queue.
     """
+    # Hide all GPUs — workers are CPU-only; this prevents PyTorch from
+    # creating a CUDA context (~256 MiB) on every visible GPU.
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
     np.random.seed(rank * 1000 + int(time.time()) % 10000)
 
     env = Env(args_ns)
