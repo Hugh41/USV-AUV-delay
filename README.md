@@ -93,11 +93,11 @@ Contributions are welcome. For documentation fixes, experiment notes, plotting i
 
 Four training scripts are provided: `train_td3.py`, `train_dsac.py` (single-process), and `train_td3_parallel.py`, `train_dsac_parallel.py` (parallel Ape-X style). Three hardware modes are supported:
 
-| Mode | Script | Hardware | Episode time (2 AUVs) |
-|:---:|:---|:---|:---|
-| CPU | `train_td3.py` / `train_dsac.py` | CPU only | ~12 min |
-| Single GPU | `train_td3.py --gpu N` / `train_dsac.py --gpu N` | 1 GPU | ~2 min |
-| Parallel | `train_td3_parallel.py --gpu N` / `train_dsac_parallel.py --gpu N` | N CPU + 1 GPU | ~1 min |
+| Mode | Script | Hardware |
+|:---:|:---|:---|
+| CPU | `train_td3.py` / `train_dsac.py` | CPU only |
+| Single GPU | `train_td3.py --gpu N` / `train_dsac.py --gpu N` | 1 GPU |
+| Parallel | `train_td3_parallel.py --gpu N` / `train_dsac_parallel.py --gpu N` | N CPU + 1 GPU |
 
 ### Single-process training
 
