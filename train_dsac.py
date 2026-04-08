@@ -52,7 +52,8 @@ class DSACAgent:
         
         if self.use_gpu:
             self.networks.cuda()
-    
+        self._use_amp = self.use_gpu and torch.cuda.is_available()
+
     def select_action(self, obs, deterministic=False):
         """选择动作"""
         with torch.no_grad():
@@ -82,17 +83,19 @@ class DSACAgent:
         """训练一步"""
         if self.buffer.size < self.kwargs["buffer_warm_size"]:
             return None
-        
-        # 采样
+
         replay_samples = self.buffer.sample_batch(self.replay_batch_size)
-        
+
         if self.use_gpu:
             for k, v in replay_samples.items():
                 replay_samples[k] = v.cuda()
-        
-        # 训练
-        alg_tb_dict = self.alg.local_update(replay_samples, iteration)
-        
+
+        if self._use_amp:
+            with torch.amp.autocast("cuda"):
+                alg_tb_dict = self.alg.local_update(replay_samples, iteration)
+        else:
+            alg_tb_dict = self.alg.local_update(replay_samples, iteration)
+
         return alg_tb_dict
     
     def save(self, filepath):

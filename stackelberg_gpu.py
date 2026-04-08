@@ -72,7 +72,7 @@ class StackelbergGPUSolver:
                  lambda_J: float = 1.0,
                  lambda_u: float = 0.05,
                  n_restarts: int = 20,
-                 n_steps: int = 100,
+                 n_steps: int = 60,
                  lr: float = 1.0):
         self.env = env
         self.agents = agents
@@ -206,6 +206,9 @@ class StackelbergGPUSolver:
         # ---- Fully batched: all K restarts optimised in parallel ----
         K = self.n_restarts
         x0_np = lo + np.random.rand(K, 2) * (hi - lo)          # (K, 2)
+        # Warm-start: seed first restart at previous optimal position
+        if prev_gpu is not None:
+            x0_np[0] = prev_gpu.cpu().numpy()
         x = torch.tensor(x0_np, dtype=torch.float32,
                          device=dev, requires_grad=True)
         opt = torch.optim.Adam([x], lr=self.lr)

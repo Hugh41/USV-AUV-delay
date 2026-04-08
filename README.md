@@ -91,29 +91,74 @@ Contributions are welcome. For documentation fixes, experiment notes, plotting i
 
 ## Train
 
-```bash
-# TD3 (default)
-python train_td3.py --N_AUV 3
+Four training scripts are provided: `train_td3.py`, `train_dsac.py` (single-process), and `train_td3_parallel.py`, `train_dsac_parallel.py` (parallel Ape-X style). Three hardware modes are supported:
 
-# DSAC-T
-python train_dsac.py --N_AUV 3
+| Mode | Script | Hardware | Episode time (2 AUVs) |
+|:---:|:---|:---|:---|
+| CPU | `train_td3.py` / `train_dsac.py` | CPU only | ~12 min |
+| Single GPU | `train_td3.py --gpu N` / `train_dsac.py --gpu N` | 1 GPU | ~2 min |
+| Parallel | `train_td3_parallel.py --gpu N` / `train_dsac_parallel.py --gpu N` | N CPU + 1 GPU | ~1 min |
+
+### Single-process training
+
+```bash
+# TD3 — 2 / 3 / 4 AUVs on GPU 0
+python train_td3.py --N_AUV 2 --usv_update_frequency 5 --save_model_freq 5 --gpu 0
+python train_td3.py --N_AUV 3 --usv_update_frequency 5 --save_model_freq 5 --gpu 1
+python train_td3.py --N_AUV 4 --usv_update_frequency 5 --save_model_freq 5 --gpu 2
+
+# DSAC-T — 2 / 3 / 4 AUVs on GPU 0
+python train_dsac.py --N_AUV 2 --usv_update_frequency 5 --save_model_freq 5 --gpu 0
+python train_dsac.py --N_AUV 3 --usv_update_frequency 5 --save_model_freq 5 --gpu 1
+python train_dsac.py --N_AUV 4 --usv_update_frequency 5 --save_model_freq 5 --gpu 2
 ```
 
-Key arguments for `train_td3.py` / `train_dsac.py`:
+### Parallel training (faster, Ape-X style)
+
+One GPU learner handles RL training and Stackelberg optimisation.
+`--n_workers` CPU processes run environment simulations in parallel and stream
+transitions to the learner. No extra GPU is required for workers.
+
+```bash
+python train_td3_parallel.py  --N_AUV 2 --usv_update_frequency 5 \
+    --save_model_freq 5 --gpu 0 --n_workers 2
+
+python train_dsac_parallel.py --N_AUV 2 --usv_update_frequency 5 \
+    --save_model_freq 5 --gpu 0 --n_workers 2
+```
+
+### Resume from checkpoint
+
+```bash
+# Resume TD3 from episode 395
+python train_td3.py --N_AUV 2 --usv_update_frequency 5 --gpu 0 \
+    --load_ep 395 --start_episode 396
+
+# Resume parallel DSAC from episode 110
+python train_dsac_parallel.py --N_AUV 2 --usv_update_frequency 5 --gpu 0 \
+    --load_ep 110 --start_episode 111 --n_workers 2
+```
+
+Checkpoints are saved to `models_{algo}_{N_AUV}AUV_{usv_update_frequency}/`
+(e.g. `models_td3_2AUV_5/`). Filenames: `TD3_{auv_idx}_{episode}_actor.pth`
+for TD3, `DSAC_{auv_idx}_{episode}.pkl` for DSAC-T.
+
+### Key arguments
 
 | Argument | Default | Description |
-|---|---|---|
-| `--N_AUV` | 2 | Number of AUVs |
-| `--episode_num` | 600 | Training episodes |
+|:---|:---:|:---|
+| `--N_AUV` | 2 | Number of AUVs (2 / 3 / 4) |
+| `--usv_update_frequency` | 5 | USV position update interval; must match at evaluation |
+| `--episode_num` | 600 | Total training episodes |
 | `--episode_length` | 1000 | Steps per episode |
-| `--n_s` | 30 | Number of sensor nodes |
-| `--N_u` / `--usv_update_frequency` | 5 | USV update interval (must match at eval) |
-| `--lr` | 0.001 | Learning rate (TD3) |
-| `--hidden_size` | 128 | Hidden layer size (TD3) |
-| `--save_model_freq` | 25 | Save checkpoint every N episodes |
-| `--load_ep` | — | Resume training from checkpoint |
-
-Models are saved to `models_{type}_{N_AUV}AUV_{Nu}/`.
+| `--save_model_freq` | 5 | Save checkpoint every N episodes |
+| `--gpu` | -1 | GPU device id; -1 = auto (CPU if no CUDA) |
+| `--load_ep` | — | Episode number of checkpoint to resume from |
+| `--start_episode` | 0 | Episode counter to start at (pair with `--load_ep`) |
+| `--n_workers` | 2 | Parallel worker count (`*_parallel.py` only) |
+| `--lr` | 0.001 | Learning rate (TD3 only) |
+| `--hidden_size` | 128 | Hidden layer width (TD3 only) |
+| `--replay_batch_size` | 256 | Mini-batch size (DSAC-T only) |
 
 ## Run Experiments
 

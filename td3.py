@@ -139,6 +139,9 @@ class TD3(object):
         self.policy_freq = 2
         self.total_it = 0
         self.batch_size = batch_size
+        # AMP: enabled only on CUDA; GradScaler is a no-op on CPU
+        self._use_amp = (device.type == "cuda")
+        self._scaler  = torch.amp.GradScaler("cuda", enabled=self._use_amp)
 
     def select_action(self, state):
         state = torch.FloatTensor(state.reshape(1, -1)).to(device)
@@ -152,45 +155,51 @@ class TD3(object):
         state, action, reward, next_state, done = self.replay_buffer.sample(
             batch_size=self.batch_size
         )
-        # Critic loss
-        with torch.no_grad():
-            noise = (torch.randn_like(action) * 0.1).clamp(-1.0, 1.0)
-            next_action = (self.actor_target(next_state) + noise).clamp(-1, 1)
-            target_Q1, target_Q2 = self.critic_target(next_state, next_action)
-            target_Q = torch.min(target_Q1, target_Q2)
-            target_Q = reward + (1 - done) * self.discount * target_Q
-        current_Q1, current_Q2 = self.critic(state, action)
-        critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(
-            current_Q2, target_Q
-        )
+        amp_ctx = torch.amp.autocast("cuda", enabled=self._use_amp)
+
+        # Critic update
+        with amp_ctx:
+            with torch.no_grad():
+                noise = (torch.randn_like(action) * 0.1).clamp(-1.0, 1.0)
+                next_action = (self.actor_target(next_state) + noise).clamp(-1, 1)
+                target_Q1, target_Q2 = self.critic_target(next_state, next_action)
+                target_Q = torch.min(target_Q1, target_Q2)
+                target_Q = reward + (1 - done) * self.discount * target_Q
+            current_Q1, current_Q2 = self.critic(state, action)
+            critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(
+                current_Q2, target_Q
+            )
         self.critic_optimizer.zero_grad()
-        critic_loss.backward()
-        self.critic_optimizer.step()
+        self._scaler.scale(critic_loss).backward()
+        self._scaler.step(self.critic_optimizer)
+        self._scaler.update()
+
         # Delayed policy updates
+        actor_loss = None
         if self.total_it % self.policy_freq == 0:
-            actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
+            with amp_ctx:
+                actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
             self.actor_optimizer.zero_grad()
-            actor_loss.backward()
-            self.actor_optimizer.step()
-            for param, target_param in zip(
-                self.actor.parameters(), self.actor_target.parameters()
-            ):
-                target_param.data.copy_(
-                    self.tau * param.data + (1 - self.tau) * target_param.data
-                )
-            for param, target_param in zip(
-                self.critic.parameters(), self.critic_target.parameters()
-            ):
-                target_param.data.copy_(
-                    self.tau * param.data + (1 - self.tau) * target_param.data
-                )
+            self._scaler.scale(actor_loss).backward()
+            self._scaler.step(self.actor_optimizer)
+            self._scaler.update()
+            with torch.no_grad():
+                for param, target_param in zip(
+                    self.actor.parameters(), self.actor_target.parameters()
+                ):
+                    target_param.data.copy_(
+                        self.tau * param.data + (1 - self.tau) * target_param.data
+                    )
+                for param, target_param in zip(
+                    self.critic.parameters(), self.critic_target.parameters()
+                ):
+                    target_param.data.copy_(
+                        self.tau * param.data + (1 - self.tau) * target_param.data
+                    )
 
         self.total_it += 1
-        # loss
-        try:
-            return actor_loss.detach().cpu().numpy(), critic_loss.detach().cpu().numpy()
-        except:
-            return 0, critic_loss.detach().cpu().numpy()
+        a_val = actor_loss.detach().cpu().float().numpy() if actor_loss is not None else 0
+        return a_val, critic_loss.detach().cpu().float().numpy()
 
     # save model
     def save(self, filename, ep, idx):
