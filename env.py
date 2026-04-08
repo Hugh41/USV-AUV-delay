@@ -6,6 +6,12 @@ from scipy.optimize import minimize, differential_evolution
 import matplotlib.pyplot as plt
 import time
 from stackelberg_game import StackelbergGame
+try:
+    import torch as _torch
+    from stackelberg_gpu import StackelbergGPUSolver
+    _GPU_SOLVER_AVAILABLE = _torch.cuda.is_available()
+except Exception:
+    _GPU_SOLVER_AVAILABLE = False
 
 
 class Env(object):
@@ -131,14 +137,20 @@ class Env(object):
             self.det_values.append(abs(det_value))  # 存储绝对值
             return det_value
 
-    def set_agents(self, agents):
+    def set_agents(self, agents, fast_mode=False, use_gpu=None):
         """
-        设置AUV智能体，用于Stackelberg博弈中的跟随者响应预测
-        
         Args:
-            agents: AUV的TD3智能体列表
+            agents: list of AUV TD3 agents
+            fast_mode: use reduced DE budget (only applies to CPU solver)
+            use_gpu: True = force GPU solver, False = force CPU solver,
+                     None = auto (use GPU if available)
         """
-        self.stackelberg_game = StackelbergGame(self, agents)
+        if use_gpu is None:
+            use_gpu = _GPU_SOLVER_AVAILABLE
+        if use_gpu and _GPU_SOLVER_AVAILABLE:
+            self.stackelberg_game = StackelbergGPUSolver(self, agents)
+        else:
+            self.stackelberg_game = StackelbergGame(self, agents, fast_mode=fast_mode)
 
     # bonus func: calculate optimal position for USV ()
     def calcposit_USV(self, use_delayed_state=True):

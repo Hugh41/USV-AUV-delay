@@ -27,6 +27,9 @@ parser.add_argument(
     "--episode_length", type=int, default=1000, help="the length of an episode (sec)"
 )
 parser.add_argument("--save_model_freq", type=int, default=25)
+parser.add_argument("--gpu", type=int, default=-1, help="GPU id to use (-1 = auto)")
+parser.add_argument("--load_ep", type=int, default=None, help="resume from checkpoint at this episode")
+parser.add_argument("--start_episode", type=int, default=0, help="episode index to start from (use with --load_ep)")
 # ------ env paras ------
 parser.add_argument(
     "--R_dc",
@@ -55,19 +58,17 @@ if not os.path.exists(SAVE_PATH):
     os.makedirs(SAVE_PATH)
 
 
-def train():
-    # noise var
+def train(start_episode=0):
     noise = 0.8
-    
-    # 记录训练历史
+
     ep_reward_history = []
     avg_reward_history = []
-    
+
     print(f"\n{'='*100}")
     print(f"{'Episode':<10} {'Total Reward':<15} {'Avg Reward (100)':<20} {'Steps':<10} {'Data Rate':<15} {'TD Error':<15}")
     print(f"{'='*100}")
-    
-    for ep in range(args.episode_num):
+
+    for ep in range(start_episode, args.episode_num):
         state_c = env.reset()
         state = copy.deepcopy(state_c)
         ep_r = 0
@@ -153,8 +154,10 @@ def train():
                 print(f"{ep:<10} {ep_reward:<15.2f} {avg_reward:<20.2f} {Ft:<10} {sum_rate:<15.2f} {avg_td_error:<15.4f}")
                 
                 # 保存收敛数据到文件
-                with open(os.path.join(SAVE_PATH, "training_log.txt"), "a") as f:
-                    if ep == 0:
+                log_path = os.path.join(SAVE_PATH, "training_log.txt")
+                write_header = not os.path.exists(log_path)
+                with open(log_path, "a") as f:
+                    if write_header:
                         f.write("Episode,Total Reward,Avg Reward (100),Steps,Data Rate,TD Error\n")
                     f.write(f"{ep},{ep_reward},{avg_reward},{Ft},{sum_rate},{avg_td_error}\n")
                 
@@ -167,18 +170,22 @@ def train():
 
 # main
 if __name__ == "__main__":
-    # 设置usv_update_frequency到args中，以便Env使用
-    if not hasattr(args, 'usv_update_frequency'):
-        args.usv_update_frequency = getattr(args, 'usv_update_frequency', 5)
-    
+    import td3 as _td3_module
+    _td3_module.set_device(args.gpu)
+
     env = Env(args)
     N_AUV = args.N_AUV
     state_dim = env.state_dim
     action_dim = 2
-    # agents
     agents = [TD3(state_dim, action_dim) for _ in range(N_AUV)]
-    # 训练时启用Stackelberg博弈优化
+
+    # Resume from checkpoint if requested
+    if args.load_ep is not None:
+        print(f"Resuming from episode {args.load_ep} ...")
+        for i in range(N_AUV):
+            agents[i].load(SAVE_PATH, args.load_ep, idx=i)
+            print(f"  Loaded AUV{i} weights from episode {args.load_ep}")
+
     env.use_stackelberg = True
-    # 设置agents到环境中，用于Stackelberg博弈中的AUV响应预测
     env.set_agents(agents)
-    train()
+    train(start_episode=args.start_episode)

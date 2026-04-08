@@ -17,20 +17,20 @@ class StackelbergGame:
     Stackelberg博弈求解器类
     """
     
-    def __init__(self, env, agents=None, lambda_J=1.0, lambda_u=0.05):
+    def __init__(self, env, agents=None, lambda_J=1.0, lambda_u=0.05, fast_mode=False):
         """
-        初始化Stackelberg博弈求解器
-        
         Args:
-            env: 环境对象
-            agents: AUV的TD3智能体列表（可选，用于预测AUV的最优响应）
-            lambda_J: FIM几何质量项权重
-            lambda_u: USV运动正则化项权重（对应论文中的 λ_u）
+            env: environment object
+            agents: list of AUV TD3 agents for follower response prediction
+            lambda_J: FIM geometry quality weight
+            lambda_u: USV motion regularization weight (paper Eq. 24)
+            fast_mode: if True, use reduced DE budget (for training speed)
         """
         self.env = env
         self.agents = agents
         self.lambda_J = lambda_J
         self.lambda_u = lambda_u
+        self.fast_mode = fast_mode
         self._prev_usv_xy = None
         
     def follower_best_response(self, usv_position, current_auv_positions, current_states):
@@ -234,22 +234,14 @@ class StackelbergGame:
         def objective(usv_pos):
             return self.leader_objective(usv_pos, current_auv_positions, current_states)
         
-        # 使用差分进化算法求解
-        # 优化参数配置：
-        # 1. popsize: 增加种群大小 (默认15 -> 20)，提高全局搜索能力，防止陷入"不动"的局部最优
-        # 2. tol: 放宽容差 (1e-3 -> 0.01)，与传统方法保持量级一致，避免过早收敛
-        # 3. mutation: 设置变异系数范围，增加探索性
-        # 4. recombination: 增加交叉概率
-        result = differential_evolution(
-            objective,
-            bounds=bounds,
-            tol=0.01,  # 放宽容差
-            popsize=20,  # 增加种群规模
-            mutation=(0.5, 1.0),  # 增加变异范围
-            recombination=0.7,    # 增加交叉概率
-            maxiter=100,  # 适度减少迭代次数，依靠种群数量取胜
-            seed=None
-        )
+        # fast_mode: lightweight budget for training; full budget for evaluation
+        if self.fast_mode:
+            de_kwargs = dict(tol=0.05, popsize=5, maxiter=20, seed=None)
+        else:
+            de_kwargs = dict(tol=0.01, popsize=20, mutation=(0.5, 1.0),
+                             recombination=0.7, maxiter=100, seed=None)
+
+        result = differential_evolution(objective, bounds=bounds, **de_kwargs)
         
         optimal_usv_position = result.x
 

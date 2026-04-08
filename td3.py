@@ -6,6 +6,14 @@ import torch.nn.functional as F
 import random
 
 
+def set_device(gpu_id: int = -1):
+    """Set global device. gpu_id=-1 means auto (cuda if available, else cpu)."""
+    global device
+    if gpu_id >= 0 and torch.cuda.is_available():
+        device = torch.device(f"cuda:{gpu_id}")
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 

@@ -148,6 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--env_id", type=str, default="gym_usv_auv_multi", help="环境ID")
     parser.add_argument("--algorithm", type=str, default="DSAC_V2", help="DSAC_V2 或 DSAC_V1")
     parser.add_argument("--enable_cuda", default=False, help="启用CUDA")
+    parser.add_argument("--gpu", type=int, default=-1, help="GPU id to use (-1 = auto)")
     parser.add_argument("--seed", default=None, help="随机种子")
 
     ################################################
@@ -238,7 +239,14 @@ if __name__ == "__main__":
     ################################################
     # 获取参数字典
     args = vars(parser.parse_args())
-    
+
+    # Set GPU device
+    gpu_id = args.pop("gpu", -1)
+    if gpu_id >= 0 and torch.cuda.is_available():
+        torch.cuda.set_device(gpu_id)
+        args["use_gpu"] = True
+        args["enable_cuda"] = True
+
     # 设置熵系数
     entropy_alpha = args.pop("entropy_alpha", 0.2)
     args["alpha"] = entropy_alpha
