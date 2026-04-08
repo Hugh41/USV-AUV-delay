@@ -3,6 +3,8 @@ import sys
 import torch
 from utils.common_utils import set_seed
 
+_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 __all__ = ["ReplayBuffer"]
 
 
@@ -22,17 +24,12 @@ class ReplayBuffer:
         self.obsv_dim = kwargs["obsv_dim"]
         self.act_dim = kwargs["action_dim"]
         self.max_size = kwargs["buffer_max_size"]
+        # CPU pinned memory for fast async CPU→GPU transfers
         self.buf = {
-            "obs": np.zeros(
-                combined_shape(self.max_size, self.obsv_dim), dtype=np.float32
-            ),
-            "obs2": np.zeros(
-                combined_shape(self.max_size, self.obsv_dim), dtype=np.float32
-            ),
-            "act": np.zeros(
-                combined_shape(self.max_size, self.act_dim), dtype=np.float32
-            ),
-            "rew": np.zeros(self.max_size, dtype=np.float32),
+            "obs":  np.zeros(combined_shape(self.max_size, self.obsv_dim), dtype=np.float32),
+            "obs2": np.zeros(combined_shape(self.max_size, self.obsv_dim), dtype=np.float32),
+            "act":  np.zeros(combined_shape(self.max_size, self.act_dim),  dtype=np.float32),
+            "rew":  np.zeros(self.max_size, dtype=np.float32),
             "done": np.zeros(self.max_size, dtype=np.float32),
             "logp": np.zeros(self.max_size, dtype=np.float32),
         }
@@ -44,10 +41,9 @@ class ReplayBuffer:
             self.buf["next_" + k] = np.zeros(
                 combined_shape(self.max_size, v["shape"]), dtype=v["dtype"]
             )
-        self.ptr, self.size, = (
-            0,
-            0,
-        )
+        self.ptr, self.size = 0, 0
+        # Detect GPU device (set by train_dsac.py via torch.cuda.set_device)
+        self._device = _device
 
     def __len__(self):
         return self.size
@@ -84,7 +80,10 @@ class ReplayBuffer:
 
     def sample_batch(self, batch_size: int):
         idxs = np.random.randint(0, self.size, size=batch_size)
-        batch = {}
-        for k, v in self.buf.items():
-            batch[k] = v[idxs]
-        return {k: torch.as_tensor(v, dtype=torch.float32) for k, v in batch.items()}
+        # non_blocking=True: async CPU→GPU transfer, no sync stall
+        return {
+            k: torch.as_tensor(v[idxs], dtype=torch.float32).to(
+                self._device, non_blocking=True
+            )
+            for k, v in self.buf.items()
+        }

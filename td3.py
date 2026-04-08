@@ -66,24 +66,54 @@ class QValueNet(torch.nn.Module):
 
 
 class ReplayBuffer:
-    def __init__(self, capacity):
+    """GPU-resident replay buffer. All data lives on device; sampling is pure GPU."""
+
+    def __init__(self, capacity, state_dim=None, action_dim=None):
         self.capacity = capacity
-        self.buffer = []
-        self.position = 0
+        self.size = 0
+        self.ptr = 0
+        # Dimensions resolved lazily on first push when not provided
+        self._state_dim = state_dim
+        self._action_dim = action_dim
+        self._initialised = False
+
+    def _init_buffers(self, state_dim, action_dim):
+        cap = self.capacity
+        dev = device
+        self._states      = torch.zeros(cap, state_dim,  dtype=torch.float32, device=dev)
+        self._actions     = torch.zeros(cap, action_dim, dtype=torch.float32, device=dev)
+        self._rewards     = torch.zeros(cap, 1,          dtype=torch.float32, device=dev)
+        self._next_states = torch.zeros(cap, state_dim,  dtype=torch.float32, device=dev)
+        self._dones       = torch.zeros(cap, 1,          dtype=torch.float32, device=dev)
+        self._initialised = True
 
     def push(self, state, action, reward, next_state, done):
-        if len(self.buffer) < self.capacity:
-            self.buffer.append(None)
-        self.buffer[self.position] = (state, action, reward, next_state, done)
-        self.position = (self.position + 1) % self.capacity
+        state      = np.asarray(state,      dtype=np.float32)
+        action     = np.asarray(action,     dtype=np.float32)
+        next_state = np.asarray(next_state, dtype=np.float32)
+        if not self._initialised:
+            self._init_buffers(state.shape[-1], action.shape[-1])
+        i = self.ptr
+        self._states[i]      = torch.from_numpy(state)
+        self._actions[i]     = torch.from_numpy(action)
+        self._rewards[i, 0]  = float(reward)
+        self._next_states[i] = torch.from_numpy(next_state)
+        self._dones[i, 0]    = float(done)
+        self.ptr  = (self.ptr + 1) % self.capacity
+        self.size = min(self.size + 1, self.capacity)
 
     def sample(self, batch_size):
-        batch = random.sample(self.buffer, batch_size)
-        state, action, reward, next_state, done = map(np.stack, zip(*batch))
-        return state, action, reward, next_state, done
+        idx = torch.randint(0, self.size, (batch_size,), device=device)
+        return (
+            self._states[idx],
+            self._actions[idx],
+            self._rewards[idx],
+            self._next_states[idx],
+            self._dones[idx],
+        )
 
     def __len__(self):
-        return len(self.buffer)
+        return self.size
 
 
 class TD3(object):
@@ -118,14 +148,10 @@ class TD3(object):
         self.replay_buffer.push(state, action, reward, next_state, done)
 
     def train(self):
+        # sample() returns GPU tensors directly — no conversion needed
         state, action, reward, next_state, done = self.replay_buffer.sample(
             batch_size=self.batch_size
         )
-        state = torch.FloatTensor(state).to(device)
-        action = torch.FloatTensor(action).to(device)
-        reward = torch.FloatTensor(reward).to(device).unsqueeze(1)
-        next_state = torch.FloatTensor(next_state).to(device)
-        done = torch.FloatTensor(done).to(device).unsqueeze(1)
         # Critic loss
         with torch.no_grad():
             noise = (torch.randn_like(action) * 0.1).clamp(-1.0, 1.0)
