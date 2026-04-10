@@ -3,7 +3,7 @@
 Training, evaluation and simulation code for the paper:
 
 > **Communication-Aware Time-Scale-Separated Bi-Level Coordination for USV-AUV Collaboration in Underwater Mobile Computing**
-> Jingzehua Xu†, Hongmiaoyi Zhang†, Zhijun Zhang
+> Jingzehua Xu†, Hongmiaoyi Zhang†
 
 ---
 
@@ -215,7 +215,7 @@ See [`plot_figures/README.md`](plot_figures/README.md) for the full usage guide.
 @article{xu2026communication,
   title={Communication-Aware Time-Scale-Separated Bi-Level Coordination
          for {USV-AUV} Collaboration in Underwater Mobile Computing},
-  author={Xu, Jingzehua and Zhang, Hongmiaoyi and Zhang, Zhijun},
+  author={Xu, Jingzehua and Zhang, Hongmiaoyi},
   year={2026}
 }
 ```
