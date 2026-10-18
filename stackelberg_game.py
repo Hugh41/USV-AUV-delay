@@ -17,7 +17,7 @@ class StackelbergGame:
     Stackelberg博弈求解器类
     """
     
-    def __init__(self, env, agents=None, lambda_J=1.0, lambda_u=0.05, fast_mode=False):
+    def __init__(self, env, agents=None, lambda_J=1.0, lambda_u=5e-8, fast_mode=False):
         """
         Args:
             env: environment object

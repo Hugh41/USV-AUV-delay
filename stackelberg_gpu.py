@@ -70,7 +70,7 @@ class StackelbergGPUSolver:
 
     def __init__(self, env, agents,
                  lambda_J: float = 1.0,
-                 lambda_u: float = 0.05,
+                 lambda_u: float = 5e-8,
                  n_restarts: int = 20,
                  n_steps: int = 60,
                  lr: float = 1.0):
