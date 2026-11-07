@@ -223,3 +223,13 @@ See [`plot_figures/README.md`](plot_figures/README.md) for the full usage guide.
 ## Acknowledgements
 
 - Baseline: [Never Too Cocky to Cooperate](https://arxiv.org/abs/2504.14894) (Xu et al.)
+
+## CPU smoke check
+
+From the repository root, run `MPLBACKEND=Agg python examples/smoke_cpu.py`. This initializes the 2/3/4-AUV environments and checks finite, bounded TD3 policy outputs on CPU. It does not train, load checkpoints, generate datasets, or establish paper-level reproduction.
+
+`constraints-offline.txt` records the direct dependency versions used for this smoke check. Install the existing `requirements.txt` with `-c constraints-offline.txt` in a separate Python environment. Use the appropriate PyTorch package for your platform; accelerator training dependencies are separate. The check was exercised locally with Python 3.9.6; the automated check targets Python 3.11.
+
+## Source and licensing
+
+See [LICENSE_SCOPE.md](LICENSE_SCOPE.md) for the original-code and third-party licensing boundary. This documentation update does not grant a new blanket open-source license.
